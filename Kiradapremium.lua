@@ -12,19 +12,34 @@ local gameId = game.PlaceId
 -- Đợi game tải
 repeat task.wait() until game:IsLoaded() and LocalPlayer
 
--- Key hợp lệ
+-- Key hợp lệ và IP tương ứng
 local validKeys = {
-    ["noob"] = true,
-    ["kiradahub"] = true,
-    ["mimi"] = true,
-    ["hangay"] = true,
-    ["bananahub"] = true,
-    ["phucdam"] = true,
-    ["ezakgaminh"] = true
+    ["noob"] = nil, -- IP sẽ được gán khi key được nhập
+    ["kiradahub"] = nil,
+    ["mimi"] = nil,
+    ["hangay"] = nil,
+    ["bananahub"] = nil,
+    ["phucdam"] = nil,
+    ["ezakgaminh"] = nil
 }
 
--- Giao diện nhập key
+-- Hàm lấy IP công khai
+local function getClientIP()
+    local success, result = pcall(function()
+        local response = HttpService:JSONDecode(game:HttpGet("https://httpbin.org/ip"))
+        return response.origin
+    end)
+    return success and result or nil
+end
+
+-- Giao diện nhập key và kiểm tra IP
 local function createKeyGui()
+    local clientIP = getClientIP()
+    if not clientIP then
+        LocalPlayer:Kick("Không thể lấy IP thiết bị! Vui lòng kiểm tra kết nối.")
+        return
+    end
+
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
@@ -68,14 +83,31 @@ local function createKeyGui()
 
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
-        if validKeys[textBox.Text:lower()] then
-            keyEntered = true
-            StarterGui:SetCore("SendNotification", {
-                Title = "Thông Báo",
-                Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
-                Duration = 5
-            })
-            screenGui:Destroy()
+        local enteredKey = textBox.Text:lower()
+        if validKeys[enteredKey] then
+            if validKeys[enteredKey] == nil then
+                -- Gán IP cho key lần đầu sử dụng
+                validKeys[enteredKey] = clientIP
+                keyEntered = true
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thông Báo",
+                    Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
+                    Duration = 5
+                })
+                screenGui:Destroy()
+            elseif validKeys[enteredKey] == clientIP then
+                -- IP khớp, cho phép tiếp tục
+                keyEntered = true
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thông Báo",
+                    Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
+                    Duration = 5
+                })
+                screenGui:Destroy()
+            else
+                -- IP không khớp, kick người chơi
+                LocalPlayer:Kick("Hãy mua key rồi hãy sài!")
+            end
         else
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
@@ -91,6 +123,24 @@ local function createKeyGui()
     end
 end
 pcall(createKeyGui)
+
+-- Kiểm tra IP mỗi 30 giây
+spawn(function()
+    while true do
+        local clientIP = getClientIP()
+        local keyUsed = nil
+        for key, ip in pairs(validKeys) do
+            if ip == clientIP then
+                keyUsed = key
+                break
+            end
+        end
+        if not keyUsed then
+            LocalPlayer:Kick("Hãy mua key rồi hãy sài!")
+        end
+        task.wait(30)
+    end
+end)
 
 -- Tải UI Redz V2
 pcall(function()
