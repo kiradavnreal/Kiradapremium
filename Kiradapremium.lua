@@ -187,7 +187,7 @@ pcall(introAnimation)
 
 -- Tạo menu chính
 local window = MakeWindow({
-    Hub = {Title = "Kirada Premium Universal", Animation = "YouTube: Kirada VN"},
+    Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
     Key = {KeySystem = false, Title = "Hệ Thống Key", Keys = {}, Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
 })
 MinimizeButton({
