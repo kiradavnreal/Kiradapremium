@@ -221,7 +221,7 @@ local function hopToLowPlayerServer()
             end)
             if success and result and result.data then
                 for _, server in pairs(result.data) do
-                    if server.playing <= 1 and server.id ~= game.JobId then
+                    if server.playing <= 4 and server.id ~= game.JobId then
                         table.insert(servers, server)
                     end
                 end
@@ -236,30 +236,45 @@ local function hopToLowPlayerServer()
                 break
             end
             attempts = attempts + 1
-            task.wait(0.5) -- Giảm thời gian chờ để tối ưu
+            task.wait(0.5)
         end
-        -- Sắp xếp ưu tiên server 0 người
+        -- Sắp xếp ưu tiên server 0, 1, 3, dưới 5 người
         table.sort(servers, function(a, b) return a.playing < b.playing end)
         return servers
     end
 
-    pcall(function()
-        local servers = getServerList()
-        if #servers > 0 then
-            TeleportService:TeleportToPlaceInstance(gameId, servers[1].id, LocalPlayer)
-            StarterGui:SetCore("SendNotification", {
-                Title = "Thông Báo",
-                Text = "Đang hop vào server có " .. tostring(servers[1].playing) .. " người!",
-                Duration = 5
-            })
-        else
-            StarterGui:SetCore("SendNotification", {
-                Title = "Lỗi",
-                Text = "Không tìm thấy server 0-1 người!",
-                Duration = 5
-            })
-        end
-    end)
+    local maxTeleportAttempts = 10
+    local teleportAttempts = 0
+    local success = false
+    while not success and teleportAttempts < maxTeleportAttempts do
+        pcall(function()
+            local servers = getServerList()
+            if #servers > 0 then
+                TeleportService:TeleportToPlaceInstance(gameId, servers[1].id, LocalPlayer)
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thông Báo",
+                    Text = "Đang hop vào server có " .. tostring(servers[1].playing) .. " người!",
+                    Duration = 5
+                })
+                success = true
+            else
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Lỗi",
+                    Text = "Không tìm thấy server dưới 5 người!",
+                    Duration = 5
+                })
+            end
+        end)
+        teleportAttempts = teleportAttempts + 1
+        task.wait(2) -- Đợi trước khi thử lại
+    end
+    if not success then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể hop server sau " .. maxTeleportAttempts .. " lần thử!",
+            Duration = 5
+        })
+    end
 end
 
 -- Hàm phát hiện admin
