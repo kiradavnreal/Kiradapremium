@@ -12,7 +12,7 @@ local gameId = game.PlaceId
 -- Đợi game tải
 repeat task.wait() until game:IsLoaded() and LocalPlayer
 
--- Key hợp lệ
+-- Key hợp lệ (với hicak hết hạn 24h từ lúc chạy)
 local validKeys = {
     ["noob"] = true,
     ["kiradahub"] = true,
@@ -20,62 +20,167 @@ local validKeys = {
     ["hangay"] = true,
     ["bananahub"] = true,
     ["phucdam"] = true,
-    ["ezakgaminh"] = true
+    ["ezakgaminh"] = true,
+    ["hicak"] = os.time() + 86400  -- Hợp lệ trong 24 giờ kể từ thời điểm chạy script
 }
 
--- Giao diện nhập key
+-- Giao diện nhập key (phiên bản đẹp hơn)
 local function createKeyGui()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
 
+    -- Background mờ (blur effect cho chuyên nghiệp)
+    local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
+    blur.Size = 10
+
     local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 300, 0, 200)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    
+    frame.Size = UDim2.new(0, 350, 0, 250)
+    frame.Position = UDim2.new(0.5, -175, 0.5, -125)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)  -- Màu tối hiện đại
+    frame.BorderSizePixel = 0
+    frame.ClipsDescendants = true
+
     local corner = Instance.new("UICorner", frame)
-    corner.CornerRadius = UDim.new(0, 10)
+    corner.CornerRadius = UDim.new(0, 15)
+
+    -- Gradient background (sử dụng UIGradient cho hiệu ứng đẹp)
+    local gradient = Instance.new("UIGradient", frame)
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 20))
+    }
+    gradient.Rotation = 45
+
+    -- Stroke viền ngoài (đẹp hơn)
+    local stroke = Instance.new("UIStroke", frame)
+    stroke.Color = Color3.fromRGB(0, 120, 255)
+    stroke.Thickness = 2
+    stroke.Transparency = 0.5
+
+    -- Shadow effect (sử dụng Frame giả để tạo bóng)
+    local shadow = Instance.new("Frame")
+    shadow.Size = frame.Size + UDim2.new(0, 10, 0, 10)
+    shadow.Position = frame.Position + UDim2.new(0, -5, 0, -5)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.7
+    shadow.ZIndex = frame.ZIndex - 1
+    shadow.Parent = screenGui
+    local shadowCorner = Instance.new("UICorner", shadow)
+    shadowCorner.CornerRadius = UDim.new(0, 15)
 
     local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.Position = UDim2.new(0, 0, 0, 10)
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Position = UDim2.new(0, 0, 0, 15)
     title.BackgroundTransparency = 1
-    title.Text = "Kirada Premium - Nhập Key"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Text = "Kirada Premium"
+    title.TextColor3 = Color3.fromRGB(0, 170, 255)  -- Màu xanh nổi bật
     title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
+    title.Font = Enum.Font.GothamBold  -- Font hiện đại hơn
+    title.TextStrokeTransparency = 0.8
+    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+    local subtitle = Instance.new("TextLabel", frame)
+    subtitle.Size = UDim2.new(1, 0, 0, 30)
+    subtitle.Position = UDim2.new(0, 0, 0, 55)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "Nhập Key Để Tiếp Tục"
+    subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+    subtitle.TextScaled = true
+    subtitle.Font = Enum.Font.Gotham
 
     local textBox = Instance.new("TextBox", frame)
-    textBox.Size = UDim2.new(0.8, 0, 0, 40)
-    textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
-    textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    textBox.Size = UDim2.new(0.8, 0, 0, 45)
+    textBox.Position = UDim2.new(0.1, 0, 0.35, 0)
+    textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     textBox.PlaceholderText = "Nhập key tại đây..."
+    textBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
     textBox.Text = ""
     textBox.TextScaled = true
+    textBox.Font = Enum.Font.Gotham
+    textBox.ClearTextOnFocus = false
+
+    local textBoxCorner = Instance.new("UICorner", textBox)
+    textBoxCorner.CornerRadius = UDim.new(0, 10)
+    local textBoxStroke = Instance.new("UIStroke", textBox)
+    textBoxStroke.Color = Color3.fromRGB(0, 120, 255)
+    textBoxStroke.Thickness = 1.5
 
     local submitButton = Instance.new("TextButton", frame)
-    submitButton.Size = UDim2.new(0.4, 0, 0, 40)
-    submitButton.Position = UDim2.new(0.3, 0, 0.6, 0)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    submitButton.Size = UDim2.new(0.8, 0, 0, 45)
+    submitButton.Position = UDim2.new(0.1, 0, 0.65, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)  -- Nút xanh dương
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    submitButton.Text = "Xác Nhận"
+    submitButton.Text = "Xác Nhận Key"
     submitButton.TextScaled = true
+    submitButton.Font = Enum.Font.GothamBold
 
-    local cornerButton = Instance.new("UICorner", submitButton)
-    cornerButton.CornerRadius = UDim.new(0, 10)
+    local buttonCorner = Instance.new("UICorner", submitButton)
+    buttonCorner.CornerRadius = UDim.new(0, 10)
+    local buttonGradient = Instance.new("UIGradient", submitButton)
+    buttonGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 200))
+    }
+    buttonGradient.Rotation = 90
+
+    -- Hover effect cho button (thay đổi màu khi di chuột)
+    submitButton.MouseEnter:Connect(function()
+        TweenService:Create(submitButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
+    end)
+    submitButton.MouseLeave:Connect(function()
+        TweenService:Create(submitButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 120, 255)}):Play()
+    end)
+
+    -- Animation fade in khi mở GUI
+    frame.BackgroundTransparency = 1
+    textBox.BackgroundTransparency = 1
+    submitButton.BackgroundTransparency = 1
+    title.TextTransparency = 1
+    subtitle.TextTransparency = 1
+    TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+    TweenService:Create(textBox, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0.2), {BackgroundTransparency = 0}):Play()
+    TweenService:Create(submitButton, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0.4), {BackgroundTransparency = 0}):Play()
+    TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+    TweenService:Create(subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint, 0.2), {TextTransparency = 0}):Play()
 
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
-        if validKeys[textBox.Text:lower()] then
-            keyEntered = true
-            StarterGui:SetCore("SendNotification", {
-                Title = "Thông Báo",
-                Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
-                Duration = 5
-            })
-            screenGui:Destroy()
+        local input = textBox.Text:lower()
+        local validity = validKeys[input]
+        if validity then
+            if typeof(validity) == "boolean" then
+                keyEntered = true
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thành Công",
+                    Text = "Cảm ơn bạn đã mua bản Premium 😍",
+                    Duration = 5
+                })
+                -- Fade out animation trước khi destroy
+                TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+                task.wait(0.5)
+                blur:Destroy()
+                screenGui:Destroy()
+            elseif typeof(validity) == "number" and os.time() <= validity then
+                keyEntered = true
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thành Công",
+                    Text = "Key tạm thời hợp lệ! Chào mừng 😍",
+                    Duration = 5
+                })
+                TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+                task.wait(0.5)
+                blur:Destroy()
+                screenGui:Destroy()
+            else
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Lỗi",
+                    Text = "Key đã hết hạn! Vui lòng lấy key mới.",
+                    Duration = 5
+                })
+                textBox.Text = ""
+            end
         else
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
@@ -83,6 +188,22 @@ local function createKeyGui()
                 Duration = 5
             })
             textBox.Text = ""
+            -- Shake animation cho textbox khi sai
+            local originalPos = textBox.Position
+            for i = 1, 5 do
+                TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos + UDim2.new(0, 10, 0, 0)}):Play()
+                task.wait(0.05)
+                TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos - UDim2.new(0, 10, 0, 0)}):Play()
+                task.wait(0.05)
+            end
+            textBox.Position = originalPos
+        end
+    end)
+
+    -- Hỗ trợ Enter key để submit
+    textBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            submitButton:Activate()
         end
     end)
 
