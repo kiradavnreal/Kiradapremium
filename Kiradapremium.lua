@@ -493,7 +493,7 @@ local function detectGameAndAddTabs()
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
         Text = "Đã load tất cả tab!"
-                   Duration = 5
+        Duration = 5
     })
 end
 
