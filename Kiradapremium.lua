@@ -5,6 +5,7 @@ local StarterGui = game:GetService("StarterGui")
 local TeleportService = game:GetService("TeleportService")
 local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")  -- Thêm để cập nhật thời gian real-time
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
@@ -19,10 +20,13 @@ local validKeys = {
     ["mimi"] = true,
     ["hangay"] = true,
     ["bananahub"] = true,
-    ["phucdam"] = true,
+    ["phucdam"] = true "permanent",  -- Ví dụ thêm permanent nếu cần
     ["ezakgaminh"] = true,
     ["hicak"] = os.time() + 86400  -- Hợp lệ trong 24 giờ kể từ thời điểm chạy script
 }
+
+-- Biến lưu thời gian hết hạn của key hicak (nếu được nhập)
+local hicakExpiration = nil
 
 -- Giao diện nhập key (phiên bản đẹp hơn)
 local function createKeyGui()
@@ -150,7 +154,7 @@ local function createKeyGui()
         local input = textBox.Text:lower()
         local validity = validKeys[input]
         if validity then
-            if typeof(validity) == "boolean" then
+            if typeof(validity) == "boolean" or validity == "permanent" then
                 keyEntered = true
                 StarterGui:SetCore("SendNotification", {
                     Title = "Thành Công",
@@ -163,6 +167,7 @@ local function createKeyGui()
                 blur:Destroy()
                 screenGui:Destroy()
             elseif typeof(validity) == "number" and os.time() <= validity then
+                hicakExpiration = validity  -- Lưu thời gian hết hạn cho hicak
                 keyEntered = true
                 StarterGui:SetCore("SendNotification", {
                     Title = "Thành Công",
@@ -212,6 +217,47 @@ local function createKeyGui()
     end
 end
 pcall(createKeyGui)
+
+-- Hàm tạo và cập nhật đồng hồ đếm ngược ở góc phải (chỉ nếu dùng hicak)
+local function createCountdownGui()
+    if not hicakExpiration then return end  -- Chỉ tạo nếu là key hicak
+
+    local countdownGui = Instance.new("ScreenGui", PlayerGui)
+    countdownGui.Name = "HicakCountdown"
+    countdownGui.IgnoreGuiInset = true
+
+    local textLabel = Instance.new("TextLabel", countdownGui)
+    textLabel.Size = UDim2.new(0, 200, 0, 50)
+    textLabel.Position = UDim2.new(1, -210, 0, 10)  -- Góc phải trên
+    textLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    textLabel.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Màu đỏ nổi bật
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.BackgroundTransparency = 0.5
+    local corner = Instance.new("UICorner", textLabel)
+    corner.CornerRadius = UDim.new(0, 8)
+    local stroke = Instance.new("UIStroke", textLabel)
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 1
+
+    -- Cập nhật thời gian real-time
+    RunService.Heartbeat:Connect(function()
+        local remaining = hicakExpiration - os.time()
+        if remaining > 0 then
+            local hours = math.floor(remaining / 3600)
+            local minutes = math.floor((remaining % 3600) / 60)
+            local seconds = remaining % 60
+            textLabel.Text = string.format("Key Hicak: %02d:%02d:%02d", hours, minutes, seconds)
+        else
+            textLabel.Text = "Key Hicak: Hết hạn!"
+            textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+            -- Có thể thêm logic kick hoặc reload script ở đây nếu cần
+            task.wait(5)
+            countdownGui:Destroy()
+        end
+    end)
+end
+spawn(createCountdownGui)  -- Chạy sau key system
 
 -- Tải UI Redz V2
 pcall(function()
@@ -283,7 +329,7 @@ pcall(introAnimation)
 
 -- Tạo menu chính
 local window = MakeWindow({
-    Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
+    Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada"},
     Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
 })
 MinimizeButton({
@@ -426,10 +472,11 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
+    addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")  -- Đã thêm từ trước
 
     -- Tab 99 Đêm
-    local tab3 = MakeTab({Name = "99 Đêm"})
-    addScriptButton(tab3, "NATHUB", "https://get.nathub.xyz/loader")
+    local tab3 = MakeTab({Name <Name = "99 Đêm"})
+0    addScriptButton(tab3, "NATHUB", "https://get.nathub.xyz/loader")
     addScriptButton(tab3, "H4X", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
     addScriptButton(tab3, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
     addScriptButton(tab3, "Hack Farm Kim Cương", "https://raw.githubusercontent.com/sleepyvill/script/refs/heads/main/99nights.lua")
@@ -437,31 +484,4 @@ local function detectGameAndAddTabs()
     addScriptButton(tab3, "Ringta", "https://raw.githubusercontent.com/wefwef127382/99daysloader.github.io/refs/heads/main/ringta.lua")
 
     -- Tab Hop Server
-    local tabHop = MakeTab({Name = "Hop Server"})
-    addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
-    addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
-    AddButton(tabHop, {
-        Name = "Hop Server Ít Người",
-        Callback = hopToLowPlayerServer
-    })
-
-    -- Tab Hệ Thống Key
-    local tabKey = MakeTab({Name = "Hệ Thống Key"})
-    addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
-
-    -- Tab Mạng Xã Hội
-    local tabSocial = MakeTab({Name = "Mạng Xã Hội"})
-    addButton(tabSocial, "Discord", "https://discord.gg/kJ9ydA2PP4")
-    addButton(tabSocial, "YouTube", "https://www.youtube.com/@kiradavn")
-    addButton(tabSocial, "TikTok", "https://www.tiktok.com/@offbyebyesad")
-
-    StarterGui:SetCore("SendNotification", {
-        Title = "Thông Báo",
-        Text = "Đã load tất cả tab!",
-        Duration = 5
-    })
-end
-
--- Chạy tab ngay lập tức
-task.wait(0.1)
-detectGameAndAddTabs()
+    local tabHop = MakeTab({Name 
