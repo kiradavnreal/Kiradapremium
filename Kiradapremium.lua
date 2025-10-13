@@ -1,4 +1,3 @@
--- Khai báo các service cần thiết
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ContentProvider = game:GetService("ContentProvider")
@@ -10,47 +9,44 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
--- Đợi game tải hoàn toàn
-repeat task.wait() until game:IsLoaded() and Players.LocalPlayer
+-- Đợi game tải
+repeat task.wait() until game:IsLoaded() and LocalPlayer
 
--- Danh sách key hợp lệ
+-- Key hợp lệ
 local validKeys = {
     ["noob"] = true,
     ["kiradahub"] = true,
     ["mimi"] = true,
     ["hangay"] = true,
-    ["bananahub"] = true
+    ["bananahub"] = true,
+    ["phucdam"] = true,
+    ["ezakgaminh"] = true
 }
 
--- Hàm tạo giao diện nhập key
+-- Giao diện nhập key
 local function createKeyGui()
-    local screenGui = Instance.new("ScreenGui")
+    local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
-    screenGui.Parent = PlayerGui
 
-    local frame = Instance.new("Frame")
+    local frame = Instance.new("Frame", screenGui)
     frame.Size = UDim2.new(0, 300, 0, 200)
     frame.Position = UDim2.new(0.5, -150, 0.5, -100)
     frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    frame.BorderSizePixel = 0
-    frame.Parent = screenGui
-
-    local corner = Instance.new("UICorner")
+    
+    local corner = Instance.new("UICorner", frame)
     corner.CornerRadius = UDim.new(0, 10)
-    corner.Parent = frame
 
-    local title = Instance.new("TextLabel")
+    local title = Instance.new("TextLabel", frame)
     title.Size = UDim2.new(1, 0, 0, 40)
     title.Position = UDim2.new(0, 0, 0, 10)
     title.BackgroundTransparency = 1
-    title.Text = "Kirada Premium Universal - Nhập Key"
+    title.Text = "Kirada Premium - Nhập Key"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextScaled = true
     title.Font = Enum.Font.SourceSansBold
-    title.Parent = frame
 
-    local textBox = Instance.new("TextBox")
+    local textBox = Instance.new("TextBox", frame)
     textBox.Size = UDim2.new(0.8, 0, 0, 40)
     textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
     textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -58,26 +54,21 @@ local function createKeyGui()
     textBox.PlaceholderText = "Nhập key tại đây..."
     textBox.Text = ""
     textBox.TextScaled = true
-    textBox.Parent = frame
 
-    local submitButton = Instance.new("TextButton")
+    local submitButton = Instance.new("TextButton", frame)
     submitButton.Size = UDim2.new(0.4, 0, 0, 40)
     submitButton.Position = UDim2.new(0.3, 0, 0.6, 0)
     submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Text = "Xác Nhận"
     submitButton.TextScaled = true
-    submitButton.Parent = frame
 
-    local cornerButton = Instance.new("UICorner")
+    local cornerButton = Instance.new("UICorner", submitButton)
     cornerButton.CornerRadius = UDim.new(0, 10)
-    cornerButton.Parent = submitButton
 
-    -- Hàm xử lý khi nhấn nút xác nhận
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
-        local enteredKey = textBox.Text:lower()
-        if validKeys[enteredKey] then
+        if validKeys[textBox.Text:lower()] then
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
                 Title = "Thông Báo",
@@ -95,33 +86,26 @@ local function createKeyGui()
         end
     end)
 
-    -- Đợi cho đến khi key được nhập đúng
     while not keyEntered do
         task.wait(0.1)
     end
 end
+pcall(createKeyGui)
 
--- Chạy hệ thống key
+-- Tải UI Redz V2
 pcall(function()
-    createKeyGui()
-end)
-
--- Tải thư viện UI Redz V2
-pcall(function()
-    local success, result = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua"))()
-    end)
+    local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
     if not success then
         StarterGui:SetCore("SendNotification", {
             Title = "Lỗi",
-            Text = "Không thể tải thư viện UI: " .. tostring(result),
+            Text = "Không thể tải UI: " .. tostring(result),
             Duration = 10
         })
         return
     end
 end)
 
--- Preload ảnh logo và âm thanh
+-- Preload tài nguyên
 pcall(function()
     ContentProvider:PreloadAsync({
         "rbxassetid://75676578090181",
@@ -130,12 +114,11 @@ pcall(function()
     })
 end)
 
--- Phát âm thanh startup
+-- Âm thanh startup
 local function playStartupSound()
     local sound = Instance.new("Sound", SoundService)
     sound.SoundId = "rbxassetid://8987546731"
     sound.Volume = 1
-    sound.PlayOnRemove = false
     sound:Play()
     sound.Ended:Connect(function()
         sound:Destroy()
@@ -146,7 +129,6 @@ pcall(playStartupSound)
 -- Intro animation
 local function introAnimation()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
-    screenGui.Name = "IntroGui"
     screenGui.IgnoreGuiInset = true
     local frame = Instance.new("Frame", screenGui)
     frame.Size = UDim2.new(0, 300, 0, 150)
@@ -156,7 +138,7 @@ local function introAnimation()
     local textLabel = Instance.new("TextLabel", frame)
     textLabel.Size = UDim2.new(1, 0, 0.6, 0)
     textLabel.BackgroundTransparency = 1
-    textLabel.Text = "Kirada Premium Universal\nTác giả: Kirada VN & Habato\nNgười test: Nấm Gamer"
+    textLabel.Text = "Kirada Premium\nTác giả: Kirada VN & Habato\nNgười test: Nấm Gamer"
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textLabel.TextScaled = true
     local imageLabel = Instance.new("ImageLabel", frame)
@@ -166,21 +148,14 @@ local function introAnimation()
     imageLabel.Image = "rbxassetid://75676578090181"
     imageLabel.ImageTransparency = 1
     local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine)
-    local fadeInText = TweenService:Create(textLabel, tweenInfo, {TextTransparency = 0})
-    local fadeInFrame = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2})
-    local fadeInImage = TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 0})
-    local fadeOutText = TweenService:Create(textLabel, tweenInfo, {TextTransparency = 1})
-    local fadeOutFrame = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1})
-    local fadeOutImage = TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 1})
-    fadeInText:Play()
-    fadeInFrame:Play()
-    fadeInImage:Play()
-    fadeInText.Completed:Wait()
-    task.wait(3)
-    fadeOutText:Play()
-    fadeOutFrame:Play()
-    fadeOutImage:Play()
-    fadeOutText.Completed:Wait()
+    TweenService:Create(textLabel, tweenInfo, {TextTransparency = 0}):Play()
+    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2}):Play()
+    TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 0}):Play()
+    task.wait(1)
+    TweenService:Create(textLabel, tweenInfo, {TextTransparency = 1}):Play()
+    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
+    TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 1}):Play()
+    task.wait(1)
     screenGui:Destroy()
 end
 pcall(introAnimation)
@@ -188,7 +163,7 @@ pcall(introAnimation)
 -- Tạo menu chính
 local window = MakeWindow({
     Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
-    Key = {KeySystem = false, Title = "Hệ Thống Key", Keys = {}, Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
+    Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
 })
 MinimizeButton({
     Image = "rbxassetid://89326205091486",
@@ -199,23 +174,19 @@ MinimizeButton({
     StrokeColor = Color3.fromRGB(255, 0, 0)
 })
 
--- Hàm thêm nút sao chép link/key
+-- Hàm thêm nút sao chép
 local function addButton(tab, name, url)
     AddButton(tab, {
         Name = name,
         Callback = function()
-            local success, err = pcall(function()
+            pcall(function()
                 setclipboard(url)
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thông Báo",
+                    Text = "Đã sao chép link " .. name .. "!",
+                    Duration = 5
+                })
             end)
-            StarterGui:SetCore("SendNotification", success and {
-                Title = "Thông Báo",
-                Text = "Đã sao chép link " .. name .. "!",
-                Duration = 10
-            } or {
-                Title = "Lỗi",
-                Text = "Không thể sao chép link " .. name .. ": " .. tostring(err),
-                Duration = 5
-            })
         end
     })
 end
@@ -225,23 +196,19 @@ local function addScriptButton(tab, name, url)
     AddButton(tab, {
         Name = name,
         Callback = function()
-            local success, err = pcall(function()
+            pcall(function()
                 loadstring(game:HttpGet(url))()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thông Báo",
+                    Text = "Đã chạy script " .. name .. "!",
+                    Duration = 5
+                })
             end)
-            StarterGui:SetCore("SendNotification", success and {
-                Title = "Thông Báo",
-                Text = "Đã chạy script " .. name .. "!",
-                Duration = 5
-            } or {
-                Title = "Lỗi",
-                Text = "Không thể chạy script " .. name .. ": " .. tostring(err),
-                Duration = 5
-            })
         end
     })
 end
 
--- Hàm nhảy vào server có 0 hoặc 1 người
+-- Hàm nhảy server thấp
 local function hopToLowPlayerServer()
     local function getServerList()
         local cursor = ""
@@ -258,20 +225,13 @@ local function hopToLowPlayerServer()
                 end
                 cursor = result.nextPageCursor
                 if not cursor then break end
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Không thể lấy danh sách server: " .. tostring(result),
-                    Duration = 5
-                })
-                break
             end
-            task.wait(1) -- Tăng thời gian để tránh rate limit
+            task.wait(1)
         end
         return servers
     end
 
-    local success, err = pcall(function()
+    pcall(function()
         local servers = getServerList()
         if #servers > 0 then
             TeleportService:TeleportToPlaceInstance(gameId, servers[1].id, LocalPlayer)
@@ -288,13 +248,6 @@ local function hopToLowPlayerServer()
             })
         end
     end)
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể nhảy server: " .. tostring(err),
-            Duration = 5
-        })
-    end
 end
 
 -- Hàm phát hiện admin
@@ -313,7 +266,7 @@ local function checkAdmin()
 end
 pcall(checkAdmin)
 
--- Hàm thêm tất cả các tab cho mọi game
+-- Thêm tất cả tab
 local function detectGameAndAddTabs()
     -- Tab Blox Fruits
     local tab1 = MakeTab({Name = "Blox Fruits"})
@@ -341,20 +294,12 @@ local function detectGameAndAddTabs()
     addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
     AddButton(tabHop, {
         Name = "Nhảy Server 0-1 Người",
-        Callback = function()
-            pcall(hopToLowPlayerServer)
-        end
+        Callback = hopToLowPlayerServer
     })
 
     -- Tab Hệ Thống Key
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
-
-    -- Tab Idol YTB Hack
-    local tabIdol = MakeTab({Name = "Idol YTB Hack"})
-    addButton(tabIdol, "Vịt Lỏd", "https://www.youtube.com/channel/UCQinN9_tN8ln_Mk3hqEfLLw")
-    addButton(tabIdol, "EZ AK Gaming", "https://www.youtube.com/@akgamingytb999")
-    addButton(tabIdol, "TBoy", "https://www.youtube.com/channel/UCTwTw3BeiQm2dNtsVeCxlYw")
 
     -- Tab Mạng Xã Hội
     local tabSocial = MakeTab({Name = "Mạng Xã Hội"})
@@ -362,14 +307,13 @@ local function detectGameAndAddTabs()
     addButton(tabSocial, "YouTube", "https://www.youtube.com/@kiradavn")
     addButton(tabSocial, "TikTok", "https://www.tiktok.com/@offbyebyesad")
 
-    -- Thông báo khi load tab
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
-        Text = "Đã load tất cả tab cho game hiện tại!",
+        Text = "Đã load tất cả tab!",
         Duration = 5
     })
 end
 
--- Chạy detectGameAndAddTabs sau khi tạo window
-task.wait(1) -- Đợi UI load
+-- Chạy tab ngay lập tức
+task.wait(0.1)
 detectGameAndAddTabs()
