@@ -28,27 +28,25 @@ local validKeys = {
 -- Biến lưu thời gian hết hạn của key hicak (nếu được nhập)
 local hicakExpiration = nil
 
--- Giao diện nhập key (phiên bản đẹp hơn)
+-- Giao diện nhập key
 local function createKeyGui()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
 
-    -- Background mờ (blur effect cho chuyên nghiệp)
     local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
     blur.Size = 10
 
     local frame = Instance.new("Frame", screenGui)
     frame.Size = UDim2.new(0, 350, 0, 250)
     frame.Position = UDim2.new(0.5, -175, 0.5, -125)
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)  -- Màu tối hiện đại
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     frame.BorderSizePixel = 0
     frame.ClipsDescendants = true
 
     local corner = Instance.new("UICorner", frame)
     corner.CornerRadius = UDim.new(0, 15)
 
-    -- Gradient background (sử dụng UIGradient cho hiệu ứng đẹp)
     local gradient = Instance.new("UIGradient", frame)
     gradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
@@ -56,13 +54,11 @@ local function createKeyGui()
     }
     gradient.Rotation = 45
 
-    -- Stroke viền ngoài (đẹp hơn)
     local stroke = Instance.new("UIStroke", frame)
     stroke.Color = Color3.fromRGB(0, 120, 255)
     stroke.Thickness = 2
     stroke.Transparency = 0.5
 
-    -- Shadow effect (sử dụng Frame giả để tạo bóng)
     local shadow = Instance.new("Frame")
     shadow.Size = frame.Size + UDim2.new(0, 10, 0, 10)
     shadow.Position = frame.Position + UDim2.new(0, -5, 0, -5)
@@ -78,9 +74,9 @@ local function createKeyGui()
     title.Position = UDim2.new(0, 0, 0, 15)
     title.BackgroundTransparency = 1
     title.Text = "Kirada Premium"
-    title.TextColor3 = Color3.fromRGB(0, 170, 255)  -- Màu xanh nổi bật
+    title.TextColor3 = Color3.fromRGB(0, 170, 255)
     title.TextScaled = true
-    title.Font = Enum.Font.GothamBold  -- Font hiện đại hơn
+    title.Font = Enum.Font.GothamBold
     title.TextStrokeTransparency = 0.8
     title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
@@ -114,7 +110,7 @@ local function createKeyGui()
     local submitButton = Instance.new("TextButton", frame)
     submitButton.Size = UDim2.new(0.8, 0, 0, 45)
     submitButton.Position = UDim2.new(0.1, 0, 0.65, 0)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)  -- Nút xanh dương
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Text = "Xác Nhận Key"
     submitButton.TextScaled = true
@@ -129,7 +125,6 @@ local function createKeyGui()
     }
     buttonGradient.Rotation = 90
 
-    -- Hover effect cho button (thay đổi màu khi di chuột)
     submitButton.MouseEnter:Connect(function()
         TweenService:Create(submitButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
     end)
@@ -137,7 +132,6 @@ local function createKeyGui()
         TweenService:Create(submitButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 120, 255)}):Play()
     end)
 
-    -- Animation fade in khi mở GUI
     frame.BackgroundTransparency = 1
     textBox.BackgroundTransparency = 1
     submitButton.BackgroundTransparency = 1
@@ -161,13 +155,12 @@ local function createKeyGui()
                     Text = "Cảm ơn bạn đã mua bản Premium 😍",
                     Duration = 5
                 })
-                -- Fade out animation trước khi destroy
                 TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
                 task.wait(0.5)
                 blur:Destroy()
                 screenGui:Destroy()
             elseif typeof(validity) == "number" and os.time() <= validity then
-                hicakExpiration = validity  -- Lưu thời gian hết hạn cho hicak
+                hicakExpiration = validity
                 keyEntered = true
                 StarterGui:SetCore("SendNotification", {
                     Title = "Thành Công",
@@ -193,7 +186,6 @@ local function createKeyGui()
                 Duration = 5
             })
             textBox.Text = ""
-            -- Shake animation cho textbox khi sai
             local originalPos = textBox.Position
             for i = 1, 5 do
                 TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos + UDim2.new(0, 10, 0, 0)}):Play()
@@ -205,7 +197,6 @@ local function createKeyGui()
         end
     end)
 
-    -- Hỗ trợ Enter key để submit
     textBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             submitButton:Activate()
@@ -220,7 +211,7 @@ pcall(createKeyGui)
 
 -- Hàm tạo và cập nhật đồng hồ đếm ngược ở góc phải (chỉ nếu dùng hicak)
 local function createCountdownGui()
-    if not hicakExpiration then return end  -- Chỉ tạo nếu là key hicak
+    if not hicakExpiration then return end
 
     local countdownGui = Instance.new("ScreenGui", PlayerGui)
     countdownGui.Name = "HicakCountdown"
@@ -228,9 +219,9 @@ local function createCountdownGui()
 
     local textLabel = Instance.new("TextLabel", countdownGui)
     textLabel.Size = UDim2.new(0, 200, 0, 50)
-    textLabel.Position = UDim2.new(1, -210, 0, 10)  -- Góc phải trên
+    textLabel.Position = UDim2.new(1, -210, 0, 10)
     textLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    textLabel.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Màu đỏ nổi bật
+    textLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     textLabel.TextScaled = true
     textLabel.Font = Enum.Font.GothamBold
     textLabel.BackgroundTransparency = 0.5
@@ -240,7 +231,6 @@ local function createCountdownGui()
     stroke.Color = Color3.fromRGB(255, 0, 0)
     stroke.Thickness = 1
 
-    -- Cập nhật thời gian real-time
     RunService.Heartbeat:Connect(function()
         local remaining = hicakExpiration - os.time()
         if remaining > 0 then
@@ -251,7 +241,6 @@ local function createCountdownGui()
         else
             textLabel.Text = "Key Hicak: Hết hạn!"
             textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-            -- Có thể thêm logic kick hoặc reload script ở đây nếu cần
             task.wait(5)
             countdownGui:Destroy()
         end
@@ -405,7 +394,6 @@ local function hopToLowPlayerServer()
             attempts = attempts + 1
             task.wait(0.5)
         end
-        -- Sắp xếp ưu tiên server 0, 1, 3, dưới 5 người
         table.sort(servers, function(a, b) return a.playing < b.playing end)
         return servers
     end
@@ -433,7 +421,7 @@ local function hopToLowPlayerServer()
             end
         end)
         teleportAttempts = teleportAttempts + 1
-        task.wait(2) -- Đợi trước khi thử lại
+        task.wait(2)
     end
     if not success then
         StarterGui:SetCore("SendNotification", {
@@ -469,7 +457,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "Nat Hub", "https://get.nathub.xyz/loader")
     addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
     addScriptButton(tab1, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
-    addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
+    addScriptButton(tab1, "Server VIP Free", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
     addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")
@@ -504,8 +492,8 @@ local function detectGameAndAddTabs()
 
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
-        Text = "Đã load tất cả tab!",
-        Duration = 5
+        Text = "Đã load tất cả tab!"
+                   Duration = 5
     })
 end
 
