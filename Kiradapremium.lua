@@ -208,12 +208,14 @@ local function addScriptButton(tab, name, url)
     })
 end
 
--- Hàm nhảy server thấp
+-- Hàm hop server ít người
 local function hopToLowPlayerServer()
     local function getServerList()
         local cursor = ""
         local servers = {}
-        while true do
+        local maxAttempts = 5
+        local attempts = 0
+        while attempts < maxAttempts do
             local success, result = pcall(function()
                 return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. gameId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor))
             end)
@@ -223,11 +225,21 @@ local function hopToLowPlayerServer()
                         table.insert(servers, server)
                     end
                 end
-                cursor = result.nextPageCursor
+                cursor = result.nextPageCursor or ""
                 if not cursor then break end
+            else
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Lỗi",
+                    Text = "Không thể lấy danh sách server!",
+                    Duration = 5
+                })
+                break
             end
-            task.wait(1)
+            attempts = attempts + 1
+            task.wait(0.5) -- Giảm thời gian chờ để tối ưu
         end
+        -- Sắp xếp ưu tiên server 0 người
+        table.sort(servers, function(a, b) return a.playing < b.playing end)
         return servers
     end
 
@@ -237,13 +249,13 @@ local function hopToLowPlayerServer()
             TeleportService:TeleportToPlaceInstance(gameId, servers[1].id, LocalPlayer)
             StarterGui:SetCore("SendNotification", {
                 Title = "Thông Báo",
-                Text = "Đang nhảy vào server có " .. tostring(servers[1].playing) .. " người!",
+                Text = "Đang hop vào server có " .. tostring(servers[1].playing) .. " người!",
                 Duration = 5
             })
         else
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
-                Text = "Không tìm thấy server có 0 hoặc 1 người!",
+                Text = "Không tìm thấy server 0-1 người!",
                 Duration = 5
             })
         end
@@ -293,7 +305,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
     addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
     AddButton(tabHop, {
-        Name = "Nhảy Server 0-1 Người",
+        Name = "Hop Server Ít Người",
         Callback = hopToLowPlayerServer
     })
 
