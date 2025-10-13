@@ -11,7 +11,11 @@ repeat task.wait() until game:IsLoaded() and LocalPlayer
 local validKeys = {
     ["noob"] = nil,
     ["kiradahub"] = nil,
-    ["mimi"] = nil
+    ["mimi"] = nil,
+    ["hangay"] = nil,
+    ["bananahub"] = nil,
+    ["phucdam"] = nil,
+    ["ezakgaminh"] = nil
 }
 
 -- Tạo GUI nhập key
@@ -39,7 +43,7 @@ local function createKeyGui()
     title.Size = UDim2.new(1, 0, 0, 50)
     title.Position = UDim2.new(0, 0, 0, 10)
     title.BackgroundTransparency = 1
-    title.Text = "Kirada Premium - Hệ Thống Key"
+    title.Text = "Kirada Premium - Nhập Key"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextScaled = true
     title.Font = Enum.Font.SourceSansBold
@@ -51,7 +55,7 @@ local function createKeyGui()
     textBox.Position = UDim2.new(0.075, 0, 0.3, 0)
     textBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textBox.PlaceholderText = "Nhập key của bạn..."
+    textBox.PlaceholderText = "Nhập key tại đây..."
     textBox.Text = ""
     textBox.TextScaled = true
     textBox.Font = Enum.Font.SourceSans
@@ -98,13 +102,16 @@ local function createKeyGui()
     TweenService:Create(submitButton, tweenInfo, {BackgroundTransparency = 0}):Play()
     TweenService:Create(title, tweenInfo, {TextTransparency = 0}):Play()
 
-    -- Xử lý nhập key
+    -- Biến kiểm tra key
     local keyEntered = false
-    submitButton.MouseButton1Click:Connect(function()
+
+    -- Xử lý xác nhận key
+    local function validateKey()
         local enteredKey = textBox.Text:lower():gsub("%s+", "") -- Loại bỏ khoảng trắng
+        feedbackLabel.Text = "" -- Xóa thông báo lỗi cũ
         if enteredKey == "" then
             feedbackLabel.Text = "Vui lòng nhập key!"
-            return
+            return false
         end
         if validKeys[enteredKey] then
             if validKeys[enteredKey] == nil or validKeys[enteredKey] == LocalPlayer.UserId then
@@ -122,26 +129,38 @@ local function createKeyGui()
                 TweenService:Create(title, tweenInfo, {TextTransparency = 1}):Play()
                 task.wait(0.5)
                 screenGui:Destroy()
+                return true
             else
                 feedbackLabel.Text = "Key đã được sử dụng bởi người khác!"
                 LocalPlayer:Kick("Key này đã được dùng. Liên hệ hỗ trợ để lấy key mới.")
+                return false
             end
         else
             feedbackLabel.Text = "Key không hợp lệ! Thử lại."
             textBox.Text = ""
+            return false
         end
+    end
+
+    -- Sự kiện nhấn nút xác nhận
+    submitButton.MouseButton1Click:Connect(function()
+        validateKey()
     end)
 
     -- Hỗ trợ nhấn Enter để gửi
     textBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
-            submitButton:Activate()
+            validateKey()
         end
     end)
 
-    -- Đợi key hợp lệ
+    -- Đợi key hợp lệ (với kiểm tra an toàn)
     while not keyEntered do
         task.wait(0.1)
+        -- Kiểm tra xem GUI còn tồn tại không để tránh vòng lặp vô hạn
+        if not screenGui.Parent then
+            break
+        end
     end
 end
 
@@ -156,9 +175,11 @@ if not success then
 end
 
 -- Thông báo thành công và chạy menu chính
-StarterGui:SetCore("SendNotification", {
-    Title = "Chào Mừng",
-    Text = "Hệ thống key đã vượt qua! Đang tải menu chính...",
-    Duration = 5
-})
--- Thêm hàm detectGameAndAddTabs() của bạn tại đây để tải menu chính
+if success then
+    StarterGui:SetCore("SendNotification", {
+        Title = "Chào Mừng",
+        Text = "Hệ thống key đã vượt qua! Đang tải menu chính...",
+        Duration = 5
+    })
+    -- Thêm hàm detectGameAndAddTabs() hoặc các phần khác của script gốc tại đây
+end
