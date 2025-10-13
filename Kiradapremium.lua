@@ -238,7 +238,6 @@ local function hopToLowPlayerServer()
             attempts = attempts + 1
             task.wait(0.5)
         end
-        -- Sắp xếp ưu tiên server 0, 1, 3, dưới 5 người
         table.sort(servers, function(a, b) return a.playing < b.playing end)
         return servers
     end
@@ -266,7 +265,7 @@ local function hopToLowPlayerServer()
             end
         end)
         teleportAttempts = teleportAttempts + 1
-        task.wait(2) -- Đợi trước khi thử lại
+        task.wait(2)
     end
     if not success then
         StarterGui:SetCore("SendNotification", {
@@ -302,7 +301,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "Nat Hub", "https://get.nathub.xyz/loader")
     addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
     addScriptButton(tab1, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
-    addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
+    addScriptButton(tab1, "Tạo Server VIP Bạn Của Bạn Có Thể Vô Chỉ Cần Gửi Link", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
 
