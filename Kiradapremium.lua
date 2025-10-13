@@ -484,15 +484,9 @@ local function detectGameAndAddTabs()
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
 
-    -- Tab Mạng Xã Hội
-    local tabSocial = MakeTab({Name = "Mạng Xã Hội"})
-    addButton(tabSocial, "Discord", "https://discord.gg/kJ9ydA2PP4")
-    addButton(tabSocial, "YouTube", "https://www.youtube.com/@kiradavn")
-    addButton(tabSocial, "TikTok", "https://www.tiktok.com/@offbyebyesad")
-
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
-        Text = "Đã load tất cả tab!"
+        Text = "Đã load tất cả tab!",
         Duration = 5
     })
 end
