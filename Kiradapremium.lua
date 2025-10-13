@@ -486,7 +486,7 @@ local function detectGameAndAddTabs()
     -- Tab Hop Server
     local tabHop = MakeTab({Name = "Hop Server"})
     addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
-    addScriptButton(tapHop, "visionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
+    addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
     AddButton(tabHop, {
         Name = "Hop Server Ít Người",
         Callback = hopToLowPlayerServer
