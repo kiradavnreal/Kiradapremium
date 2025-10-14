@@ -4,12 +4,16 @@ local ContentProvider = game:GetService("ContentProvider")
 local StarterGui = game:GetService("StarterGui")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local DataStoreService = game:GetService("DataStoreService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
 -- Đợi game tải
 repeat task.wait() until game:IsLoaded() and LocalPlayer
+
+-- DataStore để lưu thời gian kích hoạt key
+local KeyDataStore = DataStoreService:GetDataStore("KeyActivationTimes")
 
 -- Key hợp lệ
 local validKeys = {
@@ -19,8 +23,83 @@ local validKeys = {
     ["hangay"] = true,
     ["bananahub"] = true,
     ["phucdam"] = true,
-    ["ezakgaminh"] = true
+    ["ezakgaminh"] = true,
+    ["hicak"] = true -- Key mới với giới hạn 10 tiếng
 }
+
+-- Thời gian hết hạn cho key "hicak" (10 tiếng = 36000 giây)
+local HICAK_DURATION = 36000
+
+-- Hàm kiểm tra và hiển thị thời gian còn lại cho key "hicak"
+local function displayKeyTimer()
+    local screenGui = Instance.new("ScreenGui", PlayerGui)
+    screenGui.Name = "KeyTimerGui"
+    screenGui.IgnoreGuiInset = true
+
+    local timerFrame = Instance.new("Frame", screenGui)
+    timerFrame.Size = UDim2.new(0, 150, 0, 40)
+    timerFrame.Position = UDim2.new(1, -160, 0, 10)
+    timerFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    timerFrame.BorderSizePixel = 0
+
+    local corner = Instance.new("UICorner", timerFrame)
+    corner.CornerRadius = UDim.new(0, 8)
+
+    local timerLabel = Instance.new("TextLabel", timerFrame)
+    timerLabel.Size = UDim2.new(1, 0, 1, 0)
+    timerLabel.BackgroundTransparency = 1
+    timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    timerLabel.TextScaled = true
+    timerLabel.Font = Enum.Font.Gotham
+    timerLabel.Text = "Thời gian key: Đang tính..."
+
+    local function updateTimer(remainingTime)
+        if remainingTime <= 0 then
+            timerLabel.Text = "Key hicak đã hết hạn!"
+            task.wait(2)
+            screenGui:Destroy()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Lỗi",
+                Text = "Key hicak đã hết hạn! Vui lòng nhập key mới.",
+                Duration = 5
+            })
+            pcall(createKeyGui) -- Mở lại GUI nhập key
+            return
+        end
+        local hours = math.floor(remainingTime / 3600)
+        local minutes = math.floor((remainingTime % 3600) / 60)
+        local seconds = remainingTime % 60
+        timerLabel.Text = string.format("Thời gian key: %02d:%02d:%02d", hours, minutes, seconds)
+    end
+
+    -- Kiểm tra thời gian key "hicak"
+    local key = "hicak"
+    local success, activationTime = pcall(function()
+        return KeyDataStore:GetAsync(LocalPlayer.UserId .. "_" .. key)
+    end)
+
+    if success and activationTime then
+        local currentTime = os.time()
+        local elapsedTime = currentTime - activationTime
+        local remainingTime = HICAK_DURATION - elapsedTime
+
+        if remainingTime > 0 then
+            -- Cập nhật timer mỗi giây
+            spawn(function()
+                while remainingTime > 0 and timerFrame.Parent do
+                    updateTimer(remainingTime)
+                    task.wait(1)
+                    remainingTime = remainingTime - 1
+                end
+                updateTimer(0) -- Hiển thị thông báo hết hạn
+            end)
+        else
+            updateTimer(0) -- Key đã hết hạn
+        end
+    else
+        screenGui:Destroy() -- Không hiển thị timer nếu không dùng key "hicak"
+    end
+end
 
 -- Giao diện nhập key cải tiến
 local function createKeyGui()
@@ -113,7 +192,34 @@ local function createKeyGui()
 
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
-        if validKeys[textBox.Text:lower()] then
+        local enteredKey = textBox.Text:lower()
+        if validKeys[enteredKey] then
+            if enteredKey == "hicak" then
+                -- Kiểm tra thời gian key "hicak"
+                local success, activationTime = pcall(function()
+                    return KeyDataStore:GetAsync(LocalPlayer.UserId .. "_" .. enteredKey)
+                end)
+                local currentTime = os.time()
+                if success and activationTime then
+                    local elapsedTime = currentTime - activationTime
+                    if elapsedTime > HICAK_DURATION then
+                        StarterGui:SetCore("SendNotification", {
+                            Title = "Lỗi",
+                            Text = "Key hicak đã hết hạn! Vui lòng nhập key mới.",
+                            Duration = 5
+                        })
+                        textBox.Text = ""
+                        return
+                    end
+                else
+                    -- Lưu thời gian kích hoạt key "hicak"
+                    pcall(function()
+                        KeyDataStore:SetAsync(LocalPlayer.UserId .. "_" .. enteredKey, currentTime)
+                    end)
+                end
+                -- Hiển thị timer cho key "hicak"
+                displayKeyTimer()
+            end
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
                 Title = "Thông Báo",
@@ -170,8 +276,7 @@ end)
 pcall(function()
     ContentProvider:PreloadAsync({
         "rbxassetid://75676578090181",
-        "rbxassetid://89326205091486",
-        "rbxassetid://8987546731"
+        "rbxassetid://89326205091486"
     })
 end)
 
