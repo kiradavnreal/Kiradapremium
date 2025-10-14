@@ -10,8 +10,13 @@ local PlayerGui = LocalPlayer and LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
 -- Kiểm tra LocalPlayer
-if not LocalPlayer then
-    warn("Không tìm thấy LocalPlayer. Script sẽ không chạy.")
+if not LocalPlayer or not PlayerGui then
+    warn("Không tìm thấy LocalPlayer hoặc PlayerGui. Script sẽ không chạy.")
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Không tìm thấy LocalPlayer hoặc PlayerGui!",
+        Duration = 10
+    })
     return
 end
 
@@ -174,9 +179,8 @@ local function createKeyGui()
         end
     end)
 
-    while not keyEntered do
-        task.wait(0.1)
-    end
+    -- Trả về trạng thái key để không chặn menu
+    return keyEntered
 end
 
 -- Thử chạy giao diện key
@@ -188,7 +192,7 @@ if not success then
         Text = "Không thể tạo giao diện key: " .. tostring(err),
         Duration = 10
     })
-    return
+    -- Tiếp tục chạy menu ngay cả khi giao diện key lỗi
 end
 
 -- Tải thư viện UI Redz V2
@@ -203,6 +207,55 @@ if not success then
         Duration = 10
     })
     return
+end
+
+-- Kiểm tra các hàm giao diện
+if not (MakeWindow and AddButton and MinimizeButton) then
+    warn("Một hoặc nhiều hàm MakeWindow, AddButton, MinimizeButton không tồn tại. Kiểm tra thư viện UI Redz V2.")
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Thư viện UI Redz V2 không tải đúng. Vui lòng kiểm tra URL hoặc script.",
+        Duration = 10
+    })
+    return
+end
+
+-- Tạo menu chính
+local window
+local success, err = pcall(function()
+    window = MakeWindow({
+        Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
+        Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không hợp lệ", CopyKeyLink = "Đã sao chép vào clipboard"}}
+    })
+end)
+if not success then
+    warn("Lỗi khi tạo menu chính: " .. tostring(err))
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Không thể tạo menu chính: " .. tostring(err),
+        Duration = 10
+    })
+    return
+end
+
+-- Tạo nút thu nhỏ
+local success, err = pcall(function()
+    MinimizeButton({
+        Image = "rbxassetid://89326205091486",
+        Size = {60, 60},
+        Color = Color3.fromRGB(10, 10, 10),
+        Corner = true,
+        Stroke = false,
+        StrokeColor = Color3.fromRGB(255, 0, 0)
+    })
+end)
+if not success then
+    warn("Lỗi khi tạo nút thu nhỏ: " .. tostring(err))
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Không thể tạo nút thu nhỏ: " .. tostring(err),
+        Duration = 10
+    })
 end
 
 -- Tải trước tài nguyên
@@ -273,31 +326,6 @@ local function introAnimation()
 end
 introAnimation()
 
--- Kiểm tra các hàm giao diện
-if not (MakeWindow and AddButton and MinimizeButton) then
-    warn("Một hoặc nhiều hàm MakeWindow, AddButton, MinimizeButton không tồn tại. Kiểm tra thư viện UI Redz V2.")
-    StarterGui:SetCore("SendNotification", {
-        Title = "Lỗi",
-        Text = "Thư viện UI Redz V2 không tải đúng. Vui lòng kiểm tra URL hoặc script.",
-        Duration = 10
-    })
-    return
-end
-
--- Tạo menu chính
-local window = MakeWindow({
-    Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
-    Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không hợp lệ", CopyKeyLink = "Đã sao chép vào clipboard"}}
-})
-MinimizeButton({
-    Image = "rbxassetid://89326205091486",
-    Size = {60, 60},
-    Color = Color3.fromRGB(10, 10, 10),
-    Corner = true,
-    Stroke = false,
-    StrokeColor = Color3.fromRGB(255, 0, 0)
-})
-
 -- Hàm thêm nút sao chép
 local function addButton(tab, name, url)
     local success, err = pcall(function()
@@ -317,6 +345,11 @@ local function addButton(tab, name, url)
     end)
     if not success then
         warn("Lỗi khi thêm nút sao chép: " .. tostring(err))
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể thêm nút sao chép: " .. tostring(err),
+            Duration = 5
+        })
     end
 end
 
@@ -339,6 +372,11 @@ local function addScriptButton(tab, name, url)
     end)
     if not success then
         warn("Lỗi khi thêm nút script: " .. tostring(err))
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể thêm nút script: " .. tostring(err),
+            Duration = 5
+        })
     end
 end
 
@@ -477,15 +515,19 @@ local function detectGameAndAddTabs()
         })
     end)
     if not success then
-        warn("Lỗi khi thêm tab: " .. tostring(err))
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể thêm tab: " .. tostring(err),
+        warn("Lỗi khi thêm tab: " .. tostring(err),
             Duration = 10
         })
     end
 end
 
 -- Chạy các tab
-task.wait(0.1)
-detectGameAndAddTabs()
+local success, err = pcall(detectGameAndAddTabs)
+if not success then
+    warn("Lỗi khi chạy detectGameAndAddTabs: " .. tostring(err))
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Không thể tải các tab: " .. tostring(err),
+        Duration = 10
+    })
+end
