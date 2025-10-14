@@ -2,7 +2,6 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ContentProvider = game:GetService("ContentProvider")
 local StarterGui = game:GetService("StarterGui")
-local TeleportService = game:GetService("TeleportService")
 local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
@@ -269,86 +268,25 @@ local function addScriptButton(tab, name, url)
     })
 end
 
--- Hàm hop server ít người
-local function hopToLowPlayerServer()
-    local function getServerList()
-        local cursor = ""
-        local servers = {}
-        local maxAttempts = 5
-        local attempts = 0
-        while attempts < maxAttempts do
-            local success, result = pcall(function()
-                return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. gameId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor))
-            end)
-            if success and result and result.data then
-                for _, server in pairs(result.data) do
-                    if server.playing <= 4 and server.id ~= game.JobId then
-                        table.insert(servers, server)
-                    end
-                end
-                cursor = result.nextPageCursor or ""
-                if not cursor then break end
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Không thể lấy danh sách server!",
-                    Duration = 5
-                })
-                break
-            end
-            attempts = attempts + 1
-            task.wait(0.5)
-        end
-        -- Sắp xếp ưu tiên server 0, 1, 3, dưới 5 người
-        table.sort(servers, function(a, b) return a.playing < b.playing end)
-        return servers
-    end
-
-    local maxTeleportAttempts = 10
-    local teleportAttempts = 0
-    local success = false
-    while not success and teleportAttempts < maxTeleportAttempts do
-        pcall(function()
-            local servers = getServerList()
-            if #servers > 0 then
-                TeleportService:TeleportToPlaceInstance(gameId, servers[1].id, LocalPlayer)
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Thông Báo",
-                    Text = "Đang hop vào server có " .. tostring(servers[1].playing) .. " người!",
-                    Duration = 5
-                })
-                success = true
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Không tìm thấy server dưới 5 người!",
-                    Duration = 5
-                })
-            end
-        end)
-        teleportAttempts = teleportAttempts + 1
-        task.wait(2)
-    end
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể hop server sau " .. maxTeleportAttempts .. " lần thử!",
-            Duration = 5
-        })
-    end
-end
-
--- Hàm phát hiện admin
+-- Hàm phát hiện admin (đã xóa tham chiếu đến hopToLowPlayerServer)
 local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
     for _, player in pairs(Players:GetPlayers()) do
         if adminIds[player.UserId] or player:GetRoleInGroup(game.CreatorId) == "Admin" then
-            hopToLowPlayerServer()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Cảnh Báo",
+                Text = "Phát hiện admin trong server!",
+                Duration = 5
+            })
         end
     end
     Players.PlayerAdded:Connect(function(player)
         if adminIds[player.UserId] or player:GetRoleInGroup(game.CreatorId) == "Admin" then
-            hopToLowPlayerServer()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Cảnh Báo",
+                Text = "Phát hiện admin trong server!",
+                Duration = 5
+            })
         end
     end)
 end
@@ -356,7 +294,7 @@ pcall(checkAdmin)
 
 -- Thêm tất cả tab
 local function detectGameAndAddTabs()
-    -- Tab Blox Fruits (đã thay OMG HUB thành Tạo Server Mọi Game)
+    -- Tab Blox Fruits
     local tab1 = MakeTab({Name = "Blox Fruits"})
     addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
     addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
@@ -373,25 +311,14 @@ local function detectGameAndAddTabs()
     addScriptButton(tab3, "Skibidi", "https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua")
     addScriptButton(tab3, "Ringta", "https://raw.githubusercontent.com/wefwef127382/99daysloader.github.io/refs/heads/main/ringta.lua")
 
-    -- Tab Hop Server
+    -- Tab Hop Server (đã xóa nút Hop Server Ít Người)
     local tabHop = MakeTab({Name = "Hop Server"})
     addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
     addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
-    AddButton(tabHop, {
-        Name = "Hop Server Ít Người",
-        Callback = hopToLowPlayerServer
-    })
 
     -- Tab Hệ Thống Key
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
-
-    -- Tab Mạng Xã Hội
-    local tabSocial = MakeTab({Name = "Mạng Xã Hội"})
-    addButton(tabSocial, "Discord", "https://discord.gg/kJ9ydA2PP4")
-    addButton(tabSocial, "YouTube", "https://www.youtube.com/@kiradavn")
-    addButton(tabSocial, "TikTok", "https://www.tiktok.com/@offbyebyesad")
-
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
         Text = "Đã load tất cả tab!",
