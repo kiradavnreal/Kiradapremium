@@ -21,7 +21,7 @@ local validKeys = {
     ["bananahub"] = true,
     ["phucdam"] = true,
     ["ezakgaminh"] = true,
-    ["kiradagamer"] = true -- Thêm key mới
+    ["kiradagamer"] = true
 }
 
 -- Giao diện nhập key cải tiến
@@ -356,11 +356,11 @@ pcall(checkAdmin)
 
 -- Thêm tất cả tab
 local function detectGameAndAddTabs()
-    -- Tab Blox Fruits (đã xóa H4X, Nat Hub, Speed Hub)
+    -- Tab Blox Fruits (đã thay OMG HUB thành Tạo Server Mọi Game)
     local tab1 = MakeTab({Name = "Blox Fruits"})
     addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
     addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
-    addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
+    addScriptButton(tab1, "Tạo Server Mọi Game", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
 
