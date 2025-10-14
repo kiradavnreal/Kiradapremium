@@ -6,14 +6,18 @@ local TeleportService = game:GetService("TeleportService")
 local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local DataStoreService = game:GetService("DataStoreService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
+-- DataStore để lưu thời gian hết hạn key
+local KeyDataStore = DataStoreService:GetDataStore("KiradaKeyData")
+
 -- Đợi game tải
 repeat task.wait() until game:IsLoaded() and LocalPlayer
 
--- Key hợp lệ (với hicak hết hạn 24h từ lúc chạy)
+-- Key hợp lệ (không lưu hicak trong danh sách vì sẽ kiểm tra từ DataStore)
 local validKeys = {
     ["noob"] = true,
     ["kiradahub"] = true,
@@ -21,15 +25,42 @@ local validKeys = {
     ["hangay"] = true,
     ["bananahub"] = true,
     ["phucdam"] = true,
-    ["ezakgaminh"] = true,
-    ["hicak"] = os.time() + 86400  -- Hợp lệ trong 24 giờ kể từ thời điểm chạy script
+    ["ezakgaminh"] = true
 }
 
--- Biến lưu thời gian hết hạn của key hicak (nếu được nhập)
+-- Biến lưu thời gian hết hạn của key hicak
 local hicakExpiration = nil
+
+-- Kiểm tra key hicak từ DataStore khi vào game
+local function checkStoredKey()
+    local success, storedData = pcall(function()
+        return KeyDataStore:GetAsync("Hicak_" .. LocalPlayer.UserId)
+    end)
+    if success and storedData and typeof(storedData) == "number" and os.time() <= storedData then
+        hicakExpiration = storedData
+        return true
+    end
+    return false
+end
+
+-- Lưu key hicak vào DataStore
+local function saveKeyExpiration(expirationTime)
+    pcall(function()
+        KeyDataStore:SetAsync("Hicak_" .. LocalPlayer.UserId, expirationTime)
+    end)
+end
 
 -- Giao diện nhập key
 local function createKeyGui()
+    if checkStoredKey() then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Thành Công",
+            Text = "Key hicak còn hợp lệ! Chào mừng 😍",
+            Duration = 5
+        })
+        return
+    end
+
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
@@ -147,38 +178,31 @@ local function createKeyGui()
     submitButton.MouseButton1Click:Connect(function()
         local input = textBox.Text:lower()
         local validity = validKeys[input]
-        if validity then
-            if typeof(validity) == "boolean" then
-                keyEntered = true
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Thành Công",
-                    Text = "Cảm ơn bạn đã mua bản Premium 😍",
-                    Duration = 5
-                })
-                TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-                task.wait(0.5)
-                blur:Destroy()
-                screenGui:Destroy()
-            elseif typeof(validity) == "number" and os.time() <= validity then
-                hicakExpiration = validity
-                keyEntered = true
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Thành Công",
-                    Text = "Key tạm thời hợp lệ! Chào mừng 😍",
-                    Duration = 5
-                })
-                TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-                task.wait(0.5)
-                blur:Destroy()
-                screenGui:Destroy()
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Key đã hết hạn! Vui lòng lấy key mới.",
-                    Duration = 5
-                })
-                textBox.Text = ""
-            end
+        if input == "hicak" then
+            local expirationTime = os.time() + 86400
+            hicakExpiration = expirationTime
+            saveKeyExpiration(expirationTime)
+            keyEntered = true
+            StarterGui:SetCore("SendNotification", {
+                Title = "Thành Công",
+                Text = "Key tạm thời hợp lệ! Chào mừng 😍",
+                Duration = 5
+            })
+            TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+            task.wait(0.5)
+            blur:Destroy()
+            screenGui:Destroy()
+        elseif validity then
+            keyEntered = true
+            StarterGui:SetCore("SendNotification", {
+                Title = "Thành Công",
+                Text = "Cảm ơn bạn đã mua bản Premium 😍",
+                Duration = 5
+            })
+            TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+            task.wait(0.5)
+            blur:Destroy()
+            screenGui:Destroy()
         else
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
@@ -243,6 +267,7 @@ local function createCountdownGui()
             textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
             task.wait(5)
             countdownGui:Destroy()
+            pcall(createKeyGui)
         end
     end)
 end
@@ -377,7 +402,7 @@ local function hopToLowPlayerServer()
             end)
             if success and result and result.data then
                 for _, server in pairs(result.data) do
-                    if server.playing <= 4 and server.id ~= game.JobId then
+                    if server.playing <= 4 and server.id != game.JobId then
                         table.insert(servers, server)
                     end
                 end
@@ -453,8 +478,6 @@ local function detectGameAndAddTabs()
     -- Tab Blox Fruits
     local tab1 = MakeTab({Name = "Blox Fruits"})
     addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
-    addScriptButton(tab1, "H4X Script", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
-    addScriptButton(tab1, "Nat Hub", "https://get.nathub.xyz/loader")
     addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
     addScriptButton(tab1, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
     addScriptButton(tab1, "Server VIP Free", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
@@ -484,13 +507,4 @@ local function detectGameAndAddTabs()
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
 
-    StarterGui:SetCore("SendNotification", {
-        Title = "Thông Báo",
-        Text = "Đã load tất cả tab!",
-        Duration = 5
-    })
-end
-
--- Chạy tab ngay lập tức
-task.wait(0.1)
-detectGameAndAddTabs()
+    St
