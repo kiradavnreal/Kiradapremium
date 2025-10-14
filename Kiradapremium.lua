@@ -26,7 +26,7 @@ local validKeys = {
     ["redzhub"] = true
 }
 
--- Giao diện nhập key với chủ đề nửa ác quỷ nửa thiên thần
+-- Giao diện nhập key với chủ đề Minecraft
 local function createKeyGui()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
@@ -35,90 +35,79 @@ local function createKeyGui()
     local mainFrame = Instance.new("Frame", screenGui)
     mainFrame.Size = UDim2.new(0, 400, 0, 250)
     mainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(107, 142, 35) -- Màu xanh cỏ Minecraft
     
     local corner = Instance.new("UICorner", mainFrame)
-    corner.CornerRadius = UDim.new(0, 10)
+    corner.CornerRadius = UDim.new(0, 8)
 
-    -- Gradient cho chủ đề nửa ác quỷ (đỏ/đen) nửa thiên thần (trắng/xanh)
+    -- Gradient nền kiểu Minecraft (xanh cỏ đến nâu đất)
     local uiGradient = Instance.new("UIGradient", mainFrame)
     uiGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),  -- Ác quỷ: Đỏ
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)), -- Chuyển tiếp đen
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)) -- Thiên thần: Trắng
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(107, 142, 35)), -- Xanh cỏ
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 69, 19))   -- Nâu đất
     }
-    uiGradient.Rotation = 0  -- Gradient ngang
+    uiGradient.Rotation = 90 -- Gradient dọc
 
-    -- Khung con bên ác quỷ (trái)
-    local devilFrame = Instance.new("Frame", mainFrame)
-    devilFrame.Size = UDim2.new(0.5, 0, 1, 0)
-    devilFrame.Position = UDim2.new(0, 0, 0, 0)
-    devilFrame.BackgroundTransparency = 1
-
-    local devilLabel = Instance.new("TextLabel", devilFrame)
-    devilLabel.Size = UDim2.new(1, 0, 0.2, 0)
-    devilLabel.Position = UDim2.new(0, 0, 0.1, 0)
-    devilLabel.BackgroundTransparency = 1
-    devilLabel.Text = "Ác Quỷ"
-    devilLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-    devilLabel.TextScaled = true
-    devilLabel.Font = Enum.Font.GothamBlack
-
-    -- Khung con bên thiên thần (phải)
-    local angelFrame = Instance.new("Frame", mainFrame)
-    angelFrame.Size = UDim2.new(0.5, 0, 1, 0)
-    angelFrame.Position = UDim2.new(0.5, 0, 0, 0)
-    angelFrame.BackgroundTransparency = 1
-
-    local angelLabel = Instance.new("TextLabel", angelFrame)
-    angelLabel.Size = UDim2.new(1, 0, 0.2, 0)
-    angelLabel.Position = UDim2.new(0, 0, 0.1, 0)
-    angelLabel.BackgroundTransparency = 1
-    angelLabel.Text = "Thiên Thần"
-    angelLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    angelLabel.TextScaled = true
-    angelLabel.Font = Enum.Font.GothamBlack
+    -- Hình nền texture Minecraft (thay rbxassetid bằng ID texture Minecraft thực tế nếu có)
+    local texture = Instance.new("ImageLabel", mainFrame)
+    texture.Size = UDim2.new(1, 0, 1, 0)
+    texture.BackgroundTransparency = 1
+    texture.Image = "rbxassetid://0" -- Thay bằng ID texture Minecraft (ví dụ: khối cỏ)
+    texture.ImageTransparency = 0.8
+    texture.ZIndex = 0
 
     -- Tiêu đề chính
     local title = Instance.new("TextLabel", mainFrame)
     title.Size = UDim2.new(1, 0, 0.2, 0)
-    title.Position = UDim2.new(0, 0, 0, 0)
+    title.Position = UDim2.new(0, 0, 0, 10)
     title.BackgroundTransparency = 1
-    title.Text = "Kirada Premium - Nhập Key (Nửa Ác Quỷ Nửa Thiên Thần)"
+    title.Text = "Kirada Premium - Nhập Key"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
+    title.Font = Enum.Font.Minecraft -- Font Minecraft
+    title.TextStrokeTransparency = 0.7
+    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
     -- TextBox nhập key
     local textBox = Instance.new("TextBox", mainFrame)
     textBox.Size = UDim2.new(0.8, 0, 0.15, 0)
     textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
-    textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    textBox.BackgroundColor3 = Color3.fromRGB(128, 128, 128) -- Màu đá xám
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     textBox.PlaceholderText = "Nhập key tại đây..."
     textBox.Text = ""
     textBox.TextScaled = true
+    textBox.Font = Enum.Font.Minecraft
 
     local textBoxCorner = Instance.new("UICorner", textBox)
     textBoxCorner.CornerRadius = UDim.new(0, 5)
 
-    -- Nút xác nhận với gradient
+    local textBoxGradient = Instance.new("UIGradient", textBox)
+    textBoxGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(169, 169, 169)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(105, 105, 105))
+    }
+
+    -- Nút xác nhận
     local submitButton = Instance.new("TextButton", mainFrame)
     submitButton.Size = UDim2.new(0.6, 0, 0.15, 0)
     submitButton.Position = UDim2.new(0.2, 0, 0.7, 0)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 128, 0) -- Màu xanh emerald
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Text = "Xác Nhận"
     submitButton.TextScaled = true
+    submitButton.Font = Enum.Font.Minecraft
+    submitButton.TextStrokeTransparency = 0.7
+    submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
     local buttonGradient = Instance.new("UIGradient", submitButton)
     buttonGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 128, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 0))
     }
 
     local cornerButton = Instance.new("UICorner", submitButton)
-    cornerButton.CornerRadius = UDim.new(0, 10)
+    cornerButton.CornerRadius = UDim.new(0, 8)
 
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
@@ -267,7 +256,6 @@ local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
     for _, player in pairs(Players:GetPlayers()) do
         if adminIds[player.UserId] or player:GetRoleInGroup(game.CreatorId) == "Admin" then
-            -- Không hop server nữa, chỉ thông báo hoặc bỏ qua
             StarterGui:SetCore("SendNotification", {
                 Title = "Cảnh Báo",
                 Text = "Phát hiện admin trong server!",
@@ -289,13 +277,15 @@ pcall(checkAdmin)
 
 -- Thêm tất cả tab
 local function detectGameAndAddTabs()
-    -- Tab Blox Fruits (đã xóa H4X, Speed Hub, Nat Hub)
+    -- Tab Blox Fruits
     local tab1 = MakeTab({Name = "Blox Fruits"})
     addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
     addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
     addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
+    addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")
+    addScriptButton(tab1, "Server VIP Free (NoKey)", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
 
     -- Tab 99 Đêm
     local tab3 = MakeTab({Name = "99 Đêm"})
