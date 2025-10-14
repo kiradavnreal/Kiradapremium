@@ -220,6 +220,19 @@ local function createKeyGui()
 end
 pcall(createKeyGui)
 
+-- Tải UI Redz V2
+pcall(function()
+    local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
+    if not success then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể tải UI: " .. tostring(result),
+            Duration = 10
+        })
+        return
+    end
+end)
+
 -- Preload tài nguyên
 pcall(function()
     ContentProvider:PreloadAsync({
