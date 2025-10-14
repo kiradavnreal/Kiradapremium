@@ -24,13 +24,13 @@ local validKeys = {
     ["bananahub"] = true,
     ["phucdam"] = true,
     ["ezakgaminh"] = true,
-    ["hicak"] = true -- Key mới với giới hạn 10 tiếng
+    ["hicak"] = true
 }
 
 -- Thời gian hết hạn cho key "hicak" (10 tiếng = 36000 giây)
 local HICAK_DURATION = 36000
 
--- Hàm kiểm tra và hiển thị thời gian còn lại cho key "hicak"
+-- Hàm hiển thị thời gian còn lại cho key "hicak"
 local function displayKeyTimer()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeyTimerGui"
@@ -63,7 +63,7 @@ local function displayKeyTimer()
                 Text = "Key hicak đã hết hạn! Vui lòng nhập key mới.",
                 Duration = 5
             })
-            pcall(createKeyGui) -- Mở lại GUI nhập key
+            pcall(createKeyGui)
             return
         end
         local hours = math.floor(remainingTime / 3600)
@@ -72,7 +72,6 @@ local function displayKeyTimer()
         timerLabel.Text = string.format("Thời gian key: %02d:%02d:%02d", hours, minutes, seconds)
     end
 
-    -- Kiểm tra thời gian key "hicak"
     local key = "hicak"
     local success, activationTime = pcall(function()
         return KeyDataStore:GetAsync(LocalPlayer.UserId .. "_" .. key)
@@ -84,20 +83,19 @@ local function displayKeyTimer()
         local remainingTime = HICAK_DURATION - elapsedTime
 
         if remainingTime > 0 then
-            -- Cập nhật timer mỗi giây
             spawn(function()
                 while remainingTime > 0 and timerFrame.Parent do
                     updateTimer(remainingTime)
                     task.wait(1)
                     remainingTime = remainingTime - 1
                 end
-                updateTimer(0) -- Hiển thị thông báo hết hạn
+                updateTimer(0)
             end)
         else
-            updateTimer(0) -- Key đã hết hạn
+            updateTimer(0)
         end
     else
-        screenGui:Destroy() -- Không hiển thị timer nếu không dùng key "hicak"
+        screenGui:Destroy()
     end
 end
 
@@ -107,7 +105,6 @@ local function createKeyGui()
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
 
-    -- Frame chính với gradient
     local frame = Instance.new("Frame", screenGui)
     frame.Size = UDim2.new(0, 350, 0, 250)
     frame.Position = UDim2.new(0.5, -175, 0.5, -125)
@@ -124,7 +121,6 @@ local function createKeyGui()
     local corner = Instance.new("UICorner", frame)
     corner.CornerRadius = UDim.new(0, 15)
 
-    -- Shadow effect
     local shadow = Instance.new("ImageLabel", frame)
     shadow.Size = UDim2.new(1, 20, 1, 20)
     shadow.Position = UDim2.new(0, -10, 0, -10)
@@ -134,7 +130,6 @@ local function createKeyGui()
     shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
     shadow.ZIndex = -1
 
-    -- Title
     local title = Instance.new("TextLabel", frame)
     title.Size = UDim2.new(1, 0, 0, 50)
     title.Position = UDim2.new(0, 0, 0, 20)
@@ -146,7 +141,6 @@ local function createKeyGui()
     title.TextStrokeTransparency = 0.8
     title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
-    -- TextBox
     local textBox = Instance.new("TextBox", frame)
     textBox.Size = UDim2.new(0.85, 0, 0, 50)
     textBox.Position = UDim2.new(0.075, 0, 0.35, 0)
@@ -165,7 +159,6 @@ local function createKeyGui()
     textBoxStroke.Color = Color3.fromRGB(100, 100, 100)
     textBoxStroke.Thickness = 1
 
-    -- Submit Button
     local submitButton = Instance.new("TextButton", frame)
     submitButton.Size = UDim2.new(0.4, 0, 0, 50)
     submitButton.Position = UDim2.new(0.3, 0, 0.65, 0)
@@ -182,7 +175,6 @@ local function createKeyGui()
     buttonStroke.Color = Color3.fromRGB(255, 255, 255)
     buttonStroke.Thickness = 1
 
-    -- Hover effect cho button
     submitButton.MouseEnter:Connect(function()
         TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
     end)
@@ -190,12 +182,10 @@ local function createKeyGui()
         TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
     end)
 
-    local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
         local enteredKey = textBox.Text:lower()
         if validKeys[enteredKey] then
             if enteredKey == "hicak" then
-                -- Kiểm tra thời gian key "hicak"
                 local success, activationTime = pcall(function()
                     return KeyDataStore:GetAsync(LocalPlayer.UserId .. "_" .. enteredKey)
                 end)
@@ -212,21 +202,17 @@ local function createKeyGui()
                         return
                     end
                 else
-                    -- Lưu thời gian kích hoạt key "hicak"
                     pcall(function()
                         KeyDataStore:SetAsync(LocalPlayer.UserId .. "_" .. enteredKey, currentTime)
                     end)
                 end
-                -- Hiển thị timer cho key "hicak"
                 displayKeyTimer()
             end
-            keyEntered = true
             StarterGui:SetCore("SendNotification", {
                 Title = "Thông Báo",
                 Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
                 Duration = 5
             })
-            -- Hiệu ứng fade out
             local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine)
             TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
             TweenService:Create(title, tweenInfo, {TextTransparency = 1}):Play()
@@ -234,6 +220,7 @@ local function createKeyGui()
             TweenService:Create(submitButton, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
             task.wait(0.5)
             screenGui:Destroy()
+            proceedWithScript()
         else
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
@@ -241,7 +228,6 @@ local function createKeyGui()
                 Duration = 5
             })
             textBox.Text = ""
-            -- Hiệu ứng rung nhẹ khi nhập sai
             local originalPos = textBox.Position
             for i = 1, 3 do
                 TweenService:Create(textBox, TweenInfo.new(0.05), {Position = UDim2.new(0.075 + 0.01, 0, 0.35, 0)}):Play()
@@ -252,32 +238,33 @@ local function createKeyGui()
             TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos}):Play()
         end
     end)
-
-    while not keyEntered do
-        task.wait(0.1)
-    end
 end
-pcall(createKeyGui)
 
--- Tải UI Redz V2
-pcall(function()
-    local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể tải UI: " .. tostring(result),
-            Duration = 10
-        })
-        return
-    end
-end)
+-- Hàm tiếp tục script sau khi nhập key
+local function proceedWithScript()
+    pcall(introAnimation)
+    pcall(function()
+        local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
+        if not success then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Lỗi",
+                Text = "Không thể tải UI: " .. tostring(result),
+                Duration = 10
+            })
+            return
+        end
+    end)
+    pcall(detectGameAndAddTabs)
+end
 
 -- Preload tài nguyên
 pcall(function()
-    ContentProvider:PreloadAsync({
-        "rbxassetid://75676578090181",
-        "rbxassetid://89326205091486"
-    })
+    local assets = {"rbxassetid://75676578090181", "rbxassetid://89326205091486"}
+    for _, asset in pairs(assets) do
+        if game:GetService("MarketplaceService"):GetProductInfo(tonumber(asset:match("%d+"))).AssetTypeId == Enum.AssetType.Image then
+            ContentProvider:PreloadAsync({asset})
+        end
+    end
 end)
 
 -- Intro animation
@@ -312,25 +299,27 @@ local function introAnimation()
     task.wait(1)
     screenGui:Destroy()
 end
-pcall(introAnimation)
 
 -- Tạo menu chính
-local window = MakeWindow({
-    Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
-    Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
-})
-MinimizeButton({
-    Image = "rbxassetid://89326205091486",
-    Size = {60, 60},
-    Color = Color3.fromRGB(10, 10, 10),
-    Corner = true,
-    Stroke = false,
-    StrokeColor = Color3.fromRGB(255, 0, 0)
-})
+local function createMainUI()
+    local success, window = pcall(MakeWindow, {
+        Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
+        Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
+    })
+    if not success then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể tạo UI: " .. tostring(window),
+            Duration = 10
+        })
+        return
+    end
+    return window
+end
 
 -- Hàm thêm nút sao chép
 local function addButton(tab, name, url)
-    AddButton(tab, {
+    pcall(AddButton, tab, {
         Name = name,
         Callback = function()
             pcall(function()
@@ -347,16 +336,25 @@ end
 
 -- Hàm thêm nút chạy script
 local function addScriptButton(tab, name, url)
-    AddButton(tab, {
+    pcall(AddButton, tab, {
         Name = name,
         Callback = function()
             pcall(function()
-                loadstring(game:HttpGet(url))()
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Thông Báo",
-                    Text = "Đã chạy script " .. name .. "!",
-                    Duration = 5
-                })
+                local success, result = pcall(loadstring(game:HttpGet(url)))
+                if success then
+                    result()
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Thông Báo",
+                        Text = "Đã chạy script " .. name .. "!",
+                        Duration = 5
+                    })
+                else
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Lỗi",
+                        Text = "Không thể tải script " .. name .. ": " .. tostring(result),
+                        Duration = 10
+                    })
+                end
             end)
         end
     })
@@ -367,7 +365,7 @@ local function hopToLowPlayerServer()
     local function getServerList()
         local cursor = ""
         local servers = {}
-        local maxAttempts = 5
+        local maxAttempts = 3
         local attempts = 0
         while attempts < maxAttempts do
             local success, result = pcall(function()
@@ -390,13 +388,13 @@ local function hopToLowPlayerServer()
                 break
             end
             attempts = attempts + 1
-            task.wait(0.5)
+            task.wait(1)
         end
         table.sort(servers, function(a, b) return a.playing < b.playing end)
         return servers
     end
 
-    local maxTeleportAttempts = 10
+    local maxTeleportAttempts = 5
     local teleportAttempts = 0
     local success = false
     while not success and teleportAttempts < maxTeleportAttempts do
@@ -419,7 +417,7 @@ local function hopToLowPlayerServer()
             end
         end)
         teleportAttempts = teleportAttempts + 1
-        task.wait(2)
+        task.wait(3)
     end
     if not success then
         StarterGui:SetCore("SendNotification", {
@@ -434,12 +432,18 @@ end
 local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
     for _, player in pairs(Players:GetPlayers()) do
-        if adminIds[player.UserId] or player:GetRoleInGroup(game.CreatorId) == "Admin" then
+        local isAdmin = adminIds[player.UserId] or
+                        player:GetRoleInGroup(game.CreatorId):lower():find("admin") or
+                        player:IsInGroup(game.CreatorId)
+        if isAdmin then
             hopToLowPlayerServer()
         end
     end
     Players.PlayerAdded:Connect(function(player)
-        if adminIds[player.UserId] or player:GetRoleInGroup(game.CreatorId) == "Admin" then
+        local isAdmin = adminIds[player.UserId] or
+                        player:GetRoleInGroup(game.CreatorId):lower():find("admin") or
+                        player:IsInGroup(game.CreatorId)
+        if isAdmin then
             hopToLowPlayerServer()
         end
     end)
@@ -448,38 +452,45 @@ pcall(checkAdmin)
 
 -- Thêm tất cả tab
 local function detectGameAndAddTabs()
-    -- Tab Blox Fruits
-    local tab1 = MakeTab({Name = "Blox Fruits"})
-    addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
-    addScriptButton(tab1, "H4X Script", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
-    addScriptButton(tab1, "Nat Hub", "https://get.nathub.xyz/loader")
-    addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
-    addScriptButton(tab1, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
-    addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
-    addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
-    addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
+    local window = createMainUI()
+    if not window then return end
 
-    -- Tab 99 Đêm
-    local tab3 = MakeTab({Name = "99 Đêm"})
-    addScriptButton(tab3, "NATHUB", "https://get.nathub.xyz/loader")
-    addScriptButton(tab3, "H4X", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
-    addScriptButton(tab3, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
-    addScriptButton(tab3, "Hack Farm Kim Cương", "https://raw.githubusercontent.com/sleepyvill/script/refs/heads/main/99nights.lua")
-    addScriptButton(tab3, "Skibidi", "https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua")
-    addScriptButton(tab3, "Ringta", "https://raw.githubusercontent.com/wefwef127382/99daysloader.github.io/refs/heads/main/ringta.lua")
+    local tab1 = pcall(MakeTab, {Name = "Blox Fruits"})
+    if tab1 then
+        addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
+        addScriptButton(tab1, "H4X Script", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
+        addScriptButton(tab1, "Nat Hub", "https://get.nathub.xyz/loader")
+        addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
+        addScriptButton(tab1, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
+        addScriptButton(tab1, "OMG HUB Server VIP Free", "https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua")
+        addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
+        addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
+    end
 
-    -- Tab Hop Server
-    local tabHop = MakeTab({Name = "Hop Server"})
-    addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
-    addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
-    AddButton(tabHop, {
-        Name = "Hop Server Ít Người",
-        Callback = hopToLowPlayerServer
-    })
+    local tab3 = pcall(MakeTab, {Name = "99 Đêm"})
+    if tab3 then
+        addScriptButton(tab3, "NATHUB", "https://get.nathub.xyz/loader")
+        addScriptButton(tab3, "H4X", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
+        addScriptButton(tab3, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
+        addScriptButton(tab3, "Hack Farm Kim Cương", "https://raw.githubusercontent.com/sleepyvill/script/refs/heads/main/99nights.lua")
+        addScriptButton(tab3, "Skibidi", "https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua")
+        addScriptButton(tab3, "Ringta", "https://raw.githubusercontent.com/wefwef127382/99daysloader.github.io/refs/heads/main/ringta.lua")
+    end
 
-    -- Tab Hệ Thống Key
-    local tabKey = MakeTab({Name = "Hệ Thống Key"})
-    addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
+    local tabHop = pcall(MakeTab, {Name = "Hop Server"})
+    if tabHop then
+        addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
+        addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
+        pcall(AddButton, tabHop, {
+            Name = "Hop Server Ít Người",
+            Callback = hopToLowPlayerServer
+        })
+    end
+
+    local tabKey = pcall(MakeTab, {Name = "Hệ Thống Key"})
+    if tabKey then
+        addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
+    end
 
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
@@ -488,6 +499,5 @@ local function detectGameAndAddTabs()
     })
 end
 
--- Chạy tab ngay lập tức
-task.wait(0.1)
-detectGameAndAddTabs()
+-- Bắt đầu script
+pcall(createKeyGui)
