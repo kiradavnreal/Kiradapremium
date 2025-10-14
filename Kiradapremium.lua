@@ -3,7 +3,6 @@ local TweenService = game:GetService("TweenService")
 local ContentProvider = game:GetService("ContentProvider")
 local StarterGui = game:GetService("StarterGui")
 local TeleportService = game:GetService("TeleportService")
-local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
@@ -23,48 +22,94 @@ local validKeys = {
     ["ezakgaminh"] = true
 }
 
--- Giao diện nhập key
+-- Giao diện nhập key cải tiến
 local function createKeyGui()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
 
+    -- Frame chính với gradient
     local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 300, 0, 200)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    
-    local corner = Instance.new("UICorner", frame)
-    corner.CornerRadius = UDim.new(0, 10)
+    frame.Size = UDim2.new(0, 350, 0, 250)
+    frame.Position = UDim2.new(0.5, -175, 0.5, -125)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    frame.BorderSizePixel = 0
 
+    local gradient = Instance.new("UIGradient", frame)
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 20)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 50))
+    })
+    gradient.Rotation = 45
+
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 15)
+
+    -- Shadow effect
+    local shadow = Instance.new("ImageLabel", frame)
+    shadow.Size = UDim2.new(1, 20, 1, 20)
+    shadow.Position = UDim2.new(0, -10, 0, -10)
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://1316045217"
+    shadow.ImageTransparency = 0.8
+    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.ZIndex = -1
+
+    -- Title
     local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.Position = UDim2.new(0, 0, 0, 10)
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Position = UDim2.new(0, 0, 0, 20)
     title.BackgroundTransparency = 1
     title.Text = "Kirada Premium - Nhập Key"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextColor3 = Color3.fromRGB(255, 215, 0)
     title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
+    title.Font = Enum.Font.GothamBold
+    title.TextStrokeTransparency = 0.8
+    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
+    -- TextBox
     local textBox = Instance.new("TextBox", frame)
-    textBox.Size = UDim2.new(0.8, 0, 0, 40)
-    textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
-    textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    textBox.Size = UDim2.new(0.85, 0, 0, 50)
+    textBox.Position = UDim2.new(0.075, 0, 0.35, 0)
+    textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     textBox.PlaceholderText = "Nhập key tại đây..."
     textBox.Text = ""
     textBox.TextScaled = true
+    textBox.Font = Enum.Font.Gotham
+    textBox.ClearTextOnFocus = false
 
+    local textBoxCorner = Instance.new("UICorner", textBox)
+    textBoxCorner.CornerRadius = UDim.new(0, 10)
+
+    local textBoxStroke = Instance.new("UIStroke", textBox)
+    textBoxStroke.Color = Color3.fromRGB(100, 100, 100)
+    textBoxStroke.Thickness = 1
+
+    -- Submit Button
     local submitButton = Instance.new("TextButton", frame)
-    submitButton.Size = UDim2.new(0.4, 0, 0, 40)
-    submitButton.Position = UDim2.new(0.3, 0, 0.6, 0)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    submitButton.Size = UDim2.new(0.4, 0, 0, 50)
+    submitButton.Position = UDim2.new(0.3, 0, 0.65, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Text = "Xác Nhận"
     submitButton.TextScaled = true
+    submitButton.Font = Enum.Font.GothamBold
 
-    local cornerButton = Instance.new("UICorner", submitButton)
-    cornerButton.CornerRadius = UDim.new(0, 10)
+    local buttonCorner = Instance.new("UICorner", submitButton)
+    buttonCorner.CornerRadius = UDim.new(0, 10)
+
+    local buttonStroke = Instance.new("UIStroke", submitButton)
+    buttonStroke.Color = Color3.fromRGB(255, 255, 255)
+    buttonStroke.Thickness = 1
+
+    -- Hover effect cho button
+    submitButton.MouseEnter:Connect(function()
+        TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
+    end)
+    submitButton.MouseLeave:Connect(function()
+        TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
+    end)
 
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
@@ -75,6 +120,13 @@ local function createKeyGui()
                 Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
                 Duration = 5
             })
+            -- Hiệu ứng fade out
+            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine)
+            TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
+            TweenService:Create(title, tweenInfo, {TextTransparency = 1}):Play()
+            TweenService:Create(textBox, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+            TweenService:Create(submitButton, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+            task.wait(0.5)
             screenGui:Destroy()
         else
             StarterGui:SetCore("SendNotification", {
@@ -83,6 +135,15 @@ local function createKeyGui()
                 Duration = 5
             })
             textBox.Text = ""
+            -- Hiệu ứng rung nhẹ khi nhập sai
+            local originalPos = textBox.Position
+            for i = 1, 3 do
+                TweenService:Create(textBox, TweenInfo.new(0.05), {Position = UDim2.new(0.075 + 0.01, 0, 0.35, 0)}):Play()
+                task.wait(0.05)
+                TweenService:Create(textBox, TweenInfo.new(0.05), {Position = UDim2.new(0.075 - 0.01, 0, 0.35, 0)}):Play()
+                task.wait(0.05)
+            end
+            TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos}):Play()
         end
     end)
 
@@ -113,18 +174,6 @@ pcall(function()
         "rbxassetid://8987546731"
     })
 end)
-
--- Âm thanh startup
-local function playStartupSound()
-    local sound = Instance.new("Sound", SoundService)
-    sound.SoundId = "rbxassetid://8987546731"
-    sound.Volume = 1
-    sound:Play()
-    sound.Ended:Connect(function()
-        sound:Destroy()
-    end)
-end
-pcall(playStartupSound)
 
 -- Intro animation
 local function introAnimation()
@@ -238,7 +287,6 @@ local function hopToLowPlayerServer()
             attempts = attempts + 1
             task.wait(0.5)
         end
-        -- Sắp xếp ưu tiên server 0, 1, 3, dưới 5 người
         table.sort(servers, function(a, b) return a.playing < b.playing end)
         return servers
     end
@@ -266,7 +314,7 @@ local function hopToLowPlayerServer()
             end
         end)
         teleportAttempts = teleportAttempts + 1
-        task.wait(2) -- Đợi trước khi thử lại
+        task.wait(2)
     end
     if not success then
         StarterGui:SetCore("SendNotification", {
@@ -327,12 +375,6 @@ local function detectGameAndAddTabs()
     -- Tab Hệ Thống Key
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
-
-    -- Tab Mạng Xã Hội
-    local tabSocial = MakeTab({Name = "Mạng Xã Hội"})
-    addButton(tabSocial, "Discord", "https://discord.gg/kJ9ydA2PP4")
-    addButton(tabSocial, "YouTube", "https://www.youtube.com/@kiradavn")
-    addButton(tabSocial, "TikTok", "https://www.tiktok.com/@offbyebyesad")
 
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
