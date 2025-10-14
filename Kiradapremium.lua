@@ -9,8 +9,20 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
--- Đợi game tải hoàn toàn
-repeat task.wait() until game:IsLoaded() and PlayerGui
+-- Đợi game tải với thời gian tối đa 30 giây
+local maxWaitTime = 9
+local startTime = tick()
+repeat
+    task.wait()
+    if tick() - startTime >= maxWaitTime then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể tải game, vui lòng thử lại!",
+            Duration = 10
+        })
+        return
+    end
+until game:IsLoaded() and PlayerGui
 
 -- Kiểm tra game có được hỗ trợ hay không
 local supportedGames = {
@@ -23,90 +35,105 @@ if not supportedGames[gameId] then
         Text = "Cảm ơn bạn đã sử dụng script của mình nhé 😘",
         Duration = 10
     })
-    return -- Dừng script nếu game không được hỗ trợ
+    return
 end
 
--- Hàm phát hiện admin và hop server ngay lập tức
+-- Hàm phát hiện admin và hop server
 local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
     Players.PlayerAdded:Connect(function(player)
         if adminIds[player.UserId] or player.Name:lower():find("admin") or player:GetRoleInGroup(game.CreatorId) ~= "Guest" then
-            pcall(function()
-                TeleportService:TeleportToPlaceInstance(gameId, game.JobId, LocalPlayer)
-            end)
+            TeleportService:TeleportToPlaceInstance(gameId, game.JobId, LocalPlayer)
         end
     end)
 end
-pcall(checkAdmin)
+checkAdmin() -- Không cần pcall vì lỗi ở đây hiếm và có thể xử lý trong hàm
 
 -- Tải thư viện UI Redz V2
-pcall(function()
+local success, err = pcall(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua"))()
 end)
-
--- Preload ảnh logo và âm thanh
-pcall(function()
-    ContentProvider:PreloadAsync({
-        "rbxassetid://75676578090181",
-        "rbxassetid://89326205091486",
-        "rbxassetid://8987546731"
+if not success then
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Không thể tải thư viện UI: " .. tostring(err),
+        Duration = 10
     })
-end)
+    return
+end
+
+-- Preload tài nguyên (chỉ preload những gì cần thiết)
+ContentProvider:PreloadAsync({
+    "rbxassetid://75676578090181", -- Logo intro
+    "rbxassetid://89326205091486", -- Nút minimize
+    "rbxassetid://8987546731" -- Âm thanh khởi động
+})
 
 -- Phát âm thanh khởi động
 local function playStartupSound()
-    local sound = Instance.new("Sound", SoundService)
+    local sound = Instance.new("Sound")
+    sound.Parent = SoundService
     sound.SoundId = "rbxassetid://8987546731"
     sound.Volume = 1
-    sound.PlayOnRemove = false
     sound:Play()
     sound.Ended:Connect(function()
         sound:Destroy()
     end)
 end
-pcall(playStartupSound)
+playStartupSound()
 
 -- Intro animation
 local function introAnimation()
-    local screenGui = Instance.new("ScreenGui", PlayerGui)
+    local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "IntroGui"
     screenGui.IgnoreGuiInset = true
+    screenGui.Parent = PlayerGui
+
     local frame = Instance.new("Frame", screenGui)
     frame.Size = UDim2.new(0, 300, 0, 150)
     frame.Position = UDim2.new(0.5, -150, 0.5, -75)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BackgroundTransparency = 0.5
+
     local textLabel = Instance.new("TextLabel", frame)
     textLabel.Size = UDim2.new(1, 0, 0.6, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = "Kirada Premium\nTác giả: Kirada & Habato\nNgười kiểm script: Nấm Gamer & Hiếu Hầu Nam\nNgười viết code: Hiếu Gamer & Hiếu TV 124"
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.SourceSansPro
+
     local imageLabel = Instance.new("ImageLabel", frame)
     imageLabel.Size = UDim2.new(0, 100, 0, 100)
     imageLabel.Position = UDim2.new(0.5, -50, 0.6, 0)
     imageLabel.BackgroundTransparency = 1
     imageLabel.Image = "rbxassetid://75676578090181"
     imageLabel.ImageTransparency = 1
+
     local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine)
-    local fadeInText = TweenService:Create(textLabel, tweenInfo, {TextTransparency = 0})
-    local fadeInFrame = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2})
-    local fadeInImage = TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 0})
-    local fadeOutText = TweenService:Create(textLabel, tweenInfo, {TextTransparency = 1})
-    local fadeOutFrame = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1})
-    local fadeOutImage = TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 1})
-    fadeInText:Play()
-    fadeInFrame:Play()
-    fadeInImage:Play()
-    fadeInText.Completed:Wait()
-    wait(5)
-    fadeOutText:Play()
-    fadeOutFrame:Play()
-    fadeOutImage:Play()
-    fadeOutText.Completed:Wait()
+    local tweens = {
+        TweenService:Create(textLabel, tweenInfo, {TextTransparency = 0}),
+        TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2}),
+        TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 0})
+    }
+    for _, tween in ipairs(tweens) do
+        tween:Play()
+    end
+    tweens[1].Completed:Wait()
+    task.wait(5)
+
+    local fadeOutTweens = {
+        TweenService:Create(textLabel, tweenInfo, {TextTransparency = 1}),
+        TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}),
+        TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 1})
+    }
+    for _, tween in ipairs(fadeOutTweens) do
+        tween:Play()
+    end
+    fadeOutTweens[1].Completed:Wait()
     screenGui:Destroy()
 end
-pcall(introAnimation)
+introAnimation()
 
 -- Hệ thống key
 local validKeys = {
@@ -121,26 +148,26 @@ local validKeys = {
 }
 
 local function createKeySystem()
-    local keyGui = Instance.new("ScreenGui", PlayerGui)
+    local keyGui = Instance.new("ScreenGui")
     keyGui.Name = "KeySystemGui"
     keyGui.IgnoreGuiInset = true
+    keyGui.Parent = PlayerGui
 
     local frame = Instance.new("Frame", keyGui)
     frame.Size = UDim2.new(0, 400, 0, 250)
     frame.Position = UDim2.new(0.5, -200, 0.5, -125)
     frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     frame.BackgroundTransparency = 0.1
-    local corner = Instance.new("UICorner", frame)
-    corner.CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
     local title = Instance.new("TextLabel", frame)
     title.Size = UDim2.new(1, 0, 0, 50)
     title.Position = UDim2.new(0, 0, 0, 10)
     title.BackgroundTransparency = 1
-    title.Text = "Kirada Premium - Key System"
+    title.Text = "Kirada Premium - Hệ Thống Key"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextScaled = true
-    title.Font = Enum.Font.GothamBold
+    title.Font = Enum.Font.SourceSansPro
 
     local input = Instance.new("TextBox", frame)
     input.Size = UDim2.new(0.8, 0, 0, 40)
@@ -150,8 +177,8 @@ local function createKeySystem()
     input.PlaceholderText = "Nhập key tại đây..."
     input.Text = ""
     input.TextScaled = true
-    local inputCorner = Instance.new("UICorner", input)
-    inputCorner.CornerRadius = UDim.new(0, 5)
+    input.Font = Enum.Font.SourceSansPro
+    Instance.new("UICorner", input).CornerRadius = UDim.new(0, 5)
 
     local submitButton = Instance.new("TextButton", frame)
     submitButton.Size = UDim2.new(0.4, 0, 0, 40)
@@ -160,8 +187,8 @@ local function createKeySystem()
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Text = "Xác Nhận"
     submitButton.TextScaled = true
-    local buttonCorner = Instance.new("UICorner", submitButton)
-    buttonCorner.CornerRadius = UDim.new(0, 5)
+    submitButton.Font = Enum.Font.SourceSansPro
+    Instance.new("UICorner", submitButton).CornerRadius = UDim.new(0, 5)
 
     local notification = Instance.new("TextLabel", frame)
     notification.Size = UDim2.new(1, 0, 0, 30)
@@ -170,10 +197,10 @@ local function createKeySystem()
     notification.Text = ""
     notification.TextColor3 = Color3.fromRGB(255, 50, 50)
     notification.TextScaled = true
+    notification.Font = Enum.Font.SourceSansPro
 
     local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine)
-    local fadeInFrame = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0})
-    fadeInFrame:Play()
+    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0}):Play()
 
     local keyValid = false
     submitButton.MouseButton1Click:Connect(function()
@@ -182,9 +209,8 @@ local function createKeySystem()
             notification.Text = "Key hợp lệ! Đang chạy script..."
             notification.TextColor3 = Color3.fromRGB(50, 255, 50)
             keyValid = true
-            local fadeOutFrame = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1})
-            fadeOutFrame:Play()
-            wait(1)
+            TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
+            task.wait(1)
             keyGui:Destroy()
         else
             notification.Text = "Key không hợp lệ! Vui lòng thử lại."
@@ -192,15 +218,14 @@ local function createKeySystem()
         end
     end)
 
-    -- Đợi key hợp lệ
     repeat task.wait() until keyValid
 end
-pcall(createKeySystem)
+createKeySystem()
 
 -- Tạo menu chính
 local window = MakeWindow({
     Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada Premium"},
-    Key = {KeySystem = false, Title = "Hệ Thống Key", Keys = {}, Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
+    Key = {KeySystem = false} -- Tắt key system mặc định
 })
 MinimizeButton({
     Image = "rbxassetid://89326205091486",
@@ -256,10 +281,7 @@ end
 -- Tab: Blox Fruit
 local tab1 = MakeTab({Name = "Blox Fruit"})
 addScriptButton(tab1, "W-AZURE", "https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua")
-addScriptButton(tab1, "H4X Script", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
-addScriptButton(tab1, "Nat Hub", "https://get.nathub.xyz/loader")
 addScriptButton(tab1, "Quantum Hub", "https://raw.githubusercontent.com/flazhy/QuantumOnyx/refs/heads/main/QuantumOnyx.lua")
-addScriptButton(tab1, "Speed Hub", "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
 addScriptButton(tab1, "Tạo Server VIP Free", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
 addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
 addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
