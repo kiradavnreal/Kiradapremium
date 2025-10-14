@@ -10,7 +10,7 @@ local PlayerGui = LocalPlayer.PlayerGui
 -- Đợi game tải
 repeat task.wait() until game:IsLoaded() and LocalPlayer
 
--- Key hợp lệ
+-- Danh sách key hợp lệ
 local validKeys = {
     ["noob"] = true,
     ["namgamer"] = true,
@@ -26,61 +26,77 @@ local validKeys = {
     ["redzhub"] = true
 }
 
--- Giao diện nhập key với chủ đề Minecraft
+-- Giao diện nhập key với chủ đề Minecraft cải tiến
 local function createKeyGui()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
+    screenGui.ResetOnSpawn = false
 
+    -- Frame chính
     local mainFrame = Instance.new("Frame", screenGui)
-    mainFrame.Size = UDim2.new(0, 400, 0, 250)
-    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(107, 142, 35) -- Màu xanh cỏ Minecraft
-    
-    local corner = Instance.new("UICorner", mainFrame)
-    corner.CornerRadius = UDim.new(0, 8)
+    mainFrame.Size = UDim2.new(0, 450, 0, 300)
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -150)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(107, 142, 35) -- Xanh cỏ Minecraft
+    mainFrame.BorderSizePixel = 0
 
-    -- Gradient nền kiểu Minecraft (xanh cỏ đến nâu đất)
+    -- Bo góc
+    local corner = Instance.new("UICorner", mainFrame)
+    corner.CornerRadius = UDim.new(0, 12)
+
+    -- Gradient nền
     local uiGradient = Instance.new("UIGradient", mainFrame)
     uiGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(107, 142, 35)), -- Xanh cỏ
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 69, 19))   -- Nâu đất
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(107, 142, 35)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(139, 69, 19))
     }
-    uiGradient.Rotation = 90 -- Gradient dọc
+    uiGradient.Rotation = 90
 
-    -- Hình nền texture Minecraft (thay rbxassetid bằng ID texture Minecraft thực tế nếu có)
+    -- Texture khối cỏ Minecraft
     local texture = Instance.new("ImageLabel", mainFrame)
     texture.Size = UDim2.new(1, 0, 1, 0)
     texture.BackgroundTransparency = 1
-    texture.Image = "rbxassetid://0" -- Thay bằng ID texture Minecraft (ví dụ: khối cỏ)
-    texture.ImageTransparency = 0.8
+    texture.Image = "rbxassetid://518761377" -- Texture khối cỏ Minecraft
+    texture.ImageTransparency = 0.7
     texture.ZIndex = 0
 
-    -- Tiêu đề chính
+    -- Tiêu đề
     local title = Instance.new("TextLabel", mainFrame)
-    title.Size = UDim2.new(1, 0, 0.2, 0)
-    title.Position = UDim2.new(0, 0, 0, 10)
+    title.Size = UDim2.new(0.9, 0, 0.2, 0)
+    title.Position = UDim2.new(0.05, 0, 0.05, 0)
     title.BackgroundTransparency = 1
-    title.Text = "Kirada Premium - Nhập Key"
+    title.Text = "Kirada Premium - Hệ Thống Key"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextScaled = true
-    title.Font = Enum.Font.Minecraft -- Font Minecraft
-    title.TextStrokeTransparency = 0.7
+    title.Font = Enum.Font.MinecraftEvenCraft
+    title.TextStrokeTransparency = 0.6
     title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+    -- Hiệu ứng phát sáng cho tiêu đề
+    local uiStroke = Instance.new("UIStroke", title)
+    uiStroke.Color = Color3.fromRGB(255, 215, 0)
+    uiStroke.Thickness = 1.5
+    uiStroke.Transparency = 0.8
 
     -- TextBox nhập key
     local textBox = Instance.new("TextBox", mainFrame)
     textBox.Size = UDim2.new(0.8, 0, 0.15, 0)
-    textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
-    textBox.BackgroundColor3 = Color3.fromRGB(128, 128, 128) -- Màu đá xám
+    textBox.Position = UDim2.new(0.1, 0, 0.35, 0)
+    textBox.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- Xám đá
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     textBox.PlaceholderText = "Nhập key tại đây..."
     textBox.Text = ""
     textBox.TextScaled = true
-    textBox.Font = Enum.Font.Minecraft
+    textBox.Font = Enum.Font.MinecraftEvenCraft
+    textBox.ClearTextOnFocus = false
 
     local textBoxCorner = Instance.new("UICorner", textBox)
-    textBoxCorner.CornerRadius = UDim.new(0, 5)
+    textBoxCorner.CornerRadius = UDim.new(0, 8)
+
+    local textBoxStroke = Instance.new("UIStroke", textBox)
+    textBoxStroke.Color = Color3.fromRGB(255, 255, 255)
+    textBoxStroke.Thickness = 1
+    textBoxStroke.Transparency = 0.5
 
     local textBoxGradient = Instance.new("UIGradient", textBox)
     textBoxGradient.Color = ColorSequence.new{
@@ -90,15 +106,23 @@ local function createKeyGui()
 
     -- Nút xác nhận
     local submitButton = Instance.new("TextButton", mainFrame)
-    submitButton.Size = UDim2.new(0.6, 0, 0.15, 0)
-    submitButton.Position = UDim2.new(0.2, 0, 0.7, 0)
-    submitButton.BackgroundColor3 = Color3.fromRGB(0, 128, 0) -- Màu xanh emerald
+    submitButton.Size = UDim2.new(0.4, 0, 0.15, 0)
+    submitButton.Position = UDim2.new(0.3, 0, 0.65, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 128, 0) -- Xanh emerald
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitButton.Text = "Xác Nhận"
     submitButton.TextScaled = true
-    submitButton.Font = Enum.Font.Minecraft
-    submitButton.TextStrokeTransparency = 0.7
+    submitButton.Font = Enum.Font.MinecraftEvenCraft
+    submitButton.TextStrokeTransparency = 0.6
     submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+    local buttonCorner = Instance.new("UICorner", submitButton)
+    buttonCorner.CornerRadius = UDim.new(0, 8)
+
+    local buttonStroke = Instance.new("UIStroke", submitButton)
+    buttonStroke.Color = Color3.fromRGB(255, 255, 255)
+    buttonStroke.Thickness = 1
+    buttonStroke.Transparency = 0.5
 
     local buttonGradient = Instance.new("UIGradient", submitButton)
     buttonGradient.Color = ColorSequence.new{
@@ -106,48 +130,84 @@ local function createKeyGui()
         ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 0))
     }
 
-    local cornerButton = Instance.new("UICorner", submitButton)
-    cornerButton.CornerRadius = UDim.new(0, 8)
+    -- Hiệu ứng hover cho nút
+    submitButton.MouseEnter:Connect(function()
+        TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 150, 0)}):Play()
+    end)
+    submitButton.MouseLeave:Connect(function()
+        TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 128, 0)}):Play()
+    end)
 
+    -- Biến kiểm tra key
     local keyEntered = false
+
+    -- Xử lý khi nhấn nút xác nhận
     submitButton.MouseButton1Click:Connect(function()
         if validKeys[textBox.Text:lower()] then
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
-                Title = "Thông Báo",
-                Text = "Cảm ơn bạn đã mua bản Premium của tớ 😍",
-                Duration = 5
+                Title = "Thành Công",
+                Text = "Key hợp lệ! Đang tải menu chính...",
+                Duration = 4
             })
+            -- Hiệu ứng fade out
+            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+            TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 1}):Play()
+            TweenService:Create(title, tweenInfo, {TextTransparency = 1}):Play()
+            TweenService:Create(textBox, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+            TweenService:Create(submitButton, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+            TweenService:Create(texture, tweenInfo, {ImageTransparency = 1}):Play()
+            task.wait(0.5)
             screenGui:Destroy()
         else
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
-                Text = "Key không đúng! Vui lòng thử lại.",
-                Duration = 5
+                Text = "Key không hợp lệ! Vui lòng thử lại.",
+                Duration = 4
             })
             textBox.Text = ""
+            -- Hiệu ứng rung nhẹ khi nhập sai
+            local originalPos = mainFrame.Position
+            for i = 1, 3 do
+                TweenService:Create(mainFrame, TweenInfo.new(0.05), {Position = originalPos + UDim2.new(0, 5, 0, 0)}):Play()
+                task.wait(0.05)
+                TweenService:Create(mainFrame, TweenInfo.new(0.05), {Position = originalPos - UDim2.new(0, 5, 0, 0)}):Play()
+                task.wait(0.05)
+            end
+            TweenService:Create(mainFrame, TweenInfo.new(0.05), {Position = originalPos}):Play()
         end
     end)
 
-    while not keyEntered do
-        task.wait(0.1)
+    -- Hỗ trợ nhấn Enter để xác nhận
+    textBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            submitButton:Activate()
+        end
+    end)
+
+    -- Trả về biến keyEntered để kiểm tra
+    return function()
+        while not keyEntered do
+            task.wait(0.1)
+        end
+        return true
     end
 end
-pcall(createKeyGui)
 
--- Tải UI Redz V2
-pcall(function()
-    local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể tải UI: " .. tostring(result),
-            Duration = 10
-        })
-        return
-    end
-end)
+-- Chạy giao diện key và đợi xác nhận
+local checkKey = pcall(createKeyGui)
+if not checkKey then
+    StarterGui:SetCore("SendNotification", {
+        Title = "Lỗi",
+        Text = "Không thể tạo giao diện key!",
+        Duration = 5
+    })
+    return
+end
+local waitForKey = checkKey()
+waitForKey()
 
+-- Chỉ chạy phần còn lại sau khi key hợp lệ
 -- Preload tài nguyên
 pcall(function()
     ContentProvider:PreloadAsync({
@@ -174,19 +234,25 @@ local function introAnimation()
     local screenGui = Instance.new("ScreenGui", PlayerGui)
     screenGui.IgnoreGuiInset = true
     local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 300, 0, 150)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+    frame.Size = UDim2.new(0, 350, 0, 200)
+    frame.Position = UDim2.new(0.5, -175, 0.5, -100)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BackgroundTransparency = 0.5
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 12)
     local textLabel = Instance.new("TextLabel", frame)
-    textLabel.Size = UDim2.new(1, 0, 0.6, 0)
+    textLabel.Size = UDim2.new(0.9, 0, 0.5, 0)
+    textLabel.Position = UDim2.new(0.05, 0, 0.05, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = "Kirada Premium\nTác giả: Kirada VN & Habato\nNgười test: Nấm Gamer"
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.MinecraftEvenCraft
+    textLabel.TextStrokeTransparency = 0.6
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     local imageLabel = Instance.new("ImageLabel", frame)
-    imageLabel.Size = UDim2.new(0, 100, 0, 100)
-    imageLabel.Position = UDim2.new(0.5, -50, 0.6, 0)
+    imageLabel.Size = UDim2.new(0, 120, 0, 120)
+    imageLabel.Position = UDim2.new(0.5, -60, 0.55, 0)
     imageLabel.BackgroundTransparency = 1
     imageLabel.Image = "rbxassetid://75676578090181"
     imageLabel.ImageTransparency = 1
@@ -194,7 +260,7 @@ local function introAnimation()
     TweenService:Create(textLabel, tweenInfo, {TextTransparency = 0}):Play()
     TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2}):Play()
     TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 0}):Play()
-    task.wait(1)
+    task.wait(2)
     TweenService:Create(textLabel, tweenInfo, {TextTransparency = 1}):Play()
     TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
     TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 1}):Play()
@@ -202,6 +268,19 @@ local function introAnimation()
     screenGui:Destroy()
 end
 pcall(introAnimation)
+
+-- Tải UI Redz V2
+pcall(function()
+    local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
+    if not success then
+        StarterGui:SetCore("SendNotification", {
+            Title = "Lỗi",
+            Text = "Không thể tải UI: " .. tostring(result),
+            Duration = 10
+        })
+        return
+    end
+end)
 
 -- Tạo menu chính
 local window = MakeWindow({
@@ -307,6 +386,6 @@ local function detectGameAndAddTabs()
     })
 end
 
--- Chạy tab ngay lập tức
+-- Chạy tab sau khi key hợp lệ
 task.wait(0.1)
 detectGameAndAddTabs()
