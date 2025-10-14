@@ -10,7 +10,7 @@ local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
 -- Đợi game tải với thời gian tối đa 30 giây
-local maxWaitTime = 9
+local maxWaitTime = 30
 local startTime = tick()
 repeat
     task.wait()
@@ -47,7 +47,7 @@ local function checkAdmin()
         end
     end)
 end
-checkAdmin() -- Không cần pcall vì lỗi ở đây hiếm và có thể xử lý trong hàm
+checkAdmin()
 
 -- Tải thư viện UI Redz V2
 local success, err = pcall(function()
@@ -62,7 +62,7 @@ if not success then
     return
 end
 
--- Preload tài nguyên (chỉ preload những gì cần thiết)
+-- Preload tài nguyên
 ContentProvider:PreloadAsync({
     "rbxassetid://75676578090181", -- Logo intro
     "rbxassetid://89326205091486", -- Nút minimize
@@ -225,7 +225,7 @@ createKeySystem()
 -- Tạo menu chính
 local window = MakeWindow({
     Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada Premium"},
-    Key = {KeySystem = false} -- Tắt key system mặc định
+    Key = {KeySystem = false}
 })
 MinimizeButton({
     Image = "rbxassetid://89326205091486",
