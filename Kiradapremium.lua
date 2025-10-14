@@ -26,7 +26,7 @@ local validKeys = {
     ["ezakgaminh"] = true
 }
 
--- Biến lưu thời gian hết hạn của key hicak
+-- Biến lưu thời gian hết hạn key hicak
 local hicakExpiration = nil
 
 -- Kiểm tra key hicak từ DataStore
@@ -53,7 +53,7 @@ local function createKeyGui()
     if checkStoredKey() then
         StarterGui:SetCore("SendNotification", {
             Title = "Thành Công 💖",
-            Text = "Key hicak còn hợp lệ! Chào mừng bạn! 😊",
+            Text = "Key hicak còn hợp lệ! 😊",
             Duration = 5
         })
         return
@@ -64,35 +64,31 @@ local function createKeyGui()
     screenGui.IgnoreGuiInset = true
 
     local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 320, 0, 220)
-    frame.Position = UDim2.new(0.5, -160, 0.5, -110)
+    frame.Size = UDim2.new(0, 300, 0, 200)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
     frame.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- Hồng phấn
-    frame.BorderSizePixel = 0
-
     local corner = Instance.new("UICorner", frame)
-    corner.CornerRadius = UDim.new(0, 15)
+    corner.CornerRadius = UDim.new(0, 12)
 
     local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Size = UDim2.new(1, 0, 0, 40)
     title.BackgroundTransparency = 1
     title.Text = "Kirada Premium 💕"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.TextScaled = true
-    title.Font = Enum.Font.Cartoon -- Font dễ thương
-    title.TextStrokeTransparency = 0.8
-    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    title.Font = Enum.Font.Cartoon
 
     local textBox = Instance.new("TextBox", frame)
     textBox.Size = UDim2.new(0.8, 0, 0, 40)
     textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
     textBox.BackgroundColor3 = Color3.fromRGB(255, 230, 235) -- Hồng nhạt
     textBox.TextColor3 = Color3.fromRGB(50, 50, 50)
-    textBox.PlaceholderText = "Nhập key tại đây... ✨"
+    textBox.PlaceholderText = "Nhập key... ✨"
     textBox.Text = ""
     textBox.TextScaled = true
     textBox.Font = Enum.Font.Cartoon
     local textBoxCorner = Instance.new("UICorner", textBox)
-    textBoxCorner.CornerRadius = UDim.new(0, 10)
+    textBoxCorner.CornerRadius = UDim.new(0, 8)
 
     local submitButton = Instance.new("TextButton", frame)
     submitButton.Size = UDim2.new(0.5, 0, 0, 40)
@@ -103,9 +99,8 @@ local function createKeyGui()
     submitButton.TextScaled = true
     submitButton.Font = Enum.Font.Cartoon
     local buttonCorner = Instance.new("UICorner", submitButton)
-    buttonCorner.CornerRadius = UDim.new(0, 10)
+    buttonCorner.CornerRadius = UDim.new(0, 8)
 
-    -- Hiệu ứng nhấn nút
     submitButton.MouseButton1Down:Connect(function()
         TweenService:Create(submitButton, TweenInfo.new(0.2), {Size = UDim2.new(0.48, 0, 0, 38)}):Play()
     end)
@@ -124,7 +119,7 @@ local function createKeyGui()
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
                 Title = "Thành Công 💖",
-                Text = "Key hicak hợp lệ! Hết hạn sau 24h 😊",
+                Text = "Key hicak hợp lệ 24h! 😊",
                 Duration = 5
             })
             screenGui:Destroy()
@@ -132,7 +127,7 @@ local function createKeyGui()
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
                 Title = "Thành Công 💖",
-                Text = "Cảm ơn bạn đã mua bản Premium! 😍",
+                Text = "Key Premium hợp lệ! 😍",
                 Duration = 5
             })
             screenGui:Destroy()
@@ -147,22 +142,12 @@ local function createKeyGui()
     end)
 
     textBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            submitButton:Activate()
-        end
+        if enterPressed then submitButton:Activate() end
     end)
 
-    while not keyEntered do
-        task.wait(0.1)
-    end
+    while not keyEntered do task.wait(0.1) end
 end
-pcall(createKeyGui, function(err)
-    StarterGui:SetCore("SendNotification", {
-        Title = "Lỗi Key GUI",
-        Text = "Lỗi: " .. tostring(err),
-        Duration = 10
-    })
-end)
+pcall(createKeyGui)
 
 -- Đồng hồ đếm ngược cho key hicak
 local function createCountdownGui()
@@ -175,7 +160,7 @@ local function createCountdownGui()
     local textLabel = Instance.new("TextLabel", countdownGui)
     textLabel.Size = UDim2.new(0, 150, 0, 40)
     textLabel.Position = UDim2.new(1, -160, 0, 10)
-    textLabel.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- Hồng phấn
+    textLabel.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textLabel.TextScaled = true
     textLabel.Font = Enum.Font.Cartoon
@@ -199,13 +184,7 @@ local function createCountdownGui()
         end
     end)
 end
-pcall(createCountdownGui, function(err)
-    StarterGui:SetCore("SendNotification", {
-        Title = "Lỗi Countdown",
-        Text = "Lỗi: " .. tostring(err),
-        Duration = 10
-    })
-end)
+pcall(createCountdownGui)
 
 -- Tải UI Redz V2 hoặc UI dự phòng
 local function createFallbackUI()
@@ -236,60 +215,43 @@ local function createFallbackUI()
     end
 end
 
-local success, err = pcall(function()
+local success = pcall(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua"))()
 end)
-if not success then
-    StarterGui:SetCore("SendNotification", {
-        Title = "Lỗi UI",
-        Text = "Không tải được Redz V2: " .. tostring(err) .. ". Dùng UI cơ bản.",
-        Duration = 10
-    })
-    createFallbackUI()
-end
+if not success then createFallbackUI() end
 
 -- Hàm thêm nút sao chép
 local function addButton(tab, name, url)
     if not _G.AddButton then return end
-    pcall(function()
-        _G.AddButton(tab, {
-            Name = name,
-            Callback = function()
-                setclipboard(url)
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Thông Báo",
-                    Text = "Đã sao chép: " .. name .. " 💖",
-                    Duration = 5
-                })
-            end
-        })
-    end)
+    _G.AddButton(tab, {
+        Name = name,
+        Callback = function()
+            setclipboard(url)
+            StarterGui:SetCore("SendNotification", {
+                Title = "Thông Báo",
+                Text = "Đã sao chép: " .. name .. " 💖",
+                Duration = 5
+            })
+        end
+    })
 end
 
 -- Hàm thêm nút chạy script
 local function addScriptButton(tab, name, url)
     if not _G.AddButton then return end
-    pcall(function()
-        _G.AddButton(tab, {
-            Name = name,
-            Callback = function()
-                local success, result = pcall(loadstring(game:HttpGet(url)))
-                if success then
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Thành Công",
-                        Text = "Đã chạy: " .. name .. " 😊",
-                        Duration = 5
-                    })
-                else
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Lỗi Script",
-                        Text = "Lỗi khi chạy " .. name .. ": " .. tostring(result),
-                        Duration = 10
-                    })
-                end
-            end
-        })
-    end)
+    _G.AddButton(tab, {
+        Name = name,
+        Callback = function()
+            pcall(function()
+                loadstring(game:HttpGet(url))()
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thành Công",
+                    Text = "Đã chạy: " .. name .. " 😊",
+                    Duration = 5
+                })
+            end)
+        end
+    })
 end
 
 -- Hàm hop server ít người
@@ -298,10 +260,8 @@ local function hopToLowPlayerServer()
         local cursor = ""
         local servers = {}
         for i = 1, 5 do
-            local success, result = pcall(function()
-                return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. gameId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor))
-            end)
-            if success and result and result.data then
+            local result = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. gameId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor))
+            if result and result.data then
                 for _, server in pairs(result.data) do
                     if server.playing <= 4 and server.id ~= game.JobId then
                         table.insert(servers, server)
@@ -317,18 +277,12 @@ local function hopToLowPlayerServer()
     end
 
     for i = 1, 10 do
-        local success = pcall(function()
+        pcall(function()
             local servers = getServerList()
             if #servers > 0 then
                 TeleportService:TeleportToPlaceInstance(gameId, servers[1].id, LocalPlayer)
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Thông Báo",
-                    Text = "Đang hop server: " .. tostring(servers[1].playing) .. " người! 🚀",
-                    Duration = 5
-                })
             end
         end)
-        if success then break end
         task.wait(2)
     end
 end
@@ -387,17 +341,5 @@ local function detectGameAndAddTabs()
     -- Tab Hệ Thống Key
     local tabKey = _G.MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
-
-    StarterGui:SetCore("SendNotification", {
-        Title = "Thông Báo",
-        Text = "Đã load tất cả tab! 🎉",
-        Duration = 5
-    })
 end
-pcall(detectGameAndAddTabs, function(err)
-    StarterGui:SetCore("SendNotification", {
-        Title = "Lỗi Tabs",
-        Text = "Lỗi: " .. tostring(err),
-        Duration = 10
-    })
-end)
+pcall(detectGameAndAddTabs)
