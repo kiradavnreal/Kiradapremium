@@ -111,7 +111,7 @@ local function createKeyGui()
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
                 Title = "Thành Công",
-                Text = "Chúc mừng! Key hợp lệ, đang tải script... 😍",
+                Text = "Cảm ơn bạn đã sử dụng premium của mình 😍😘",
                 Duration = 5
             })
             -- Hiệu ứng mờ dần khi xác nhận
@@ -268,7 +268,7 @@ local function addScriptButton(tab, name, url)
     })
 end
 
--- Hàm phát hiện admin (đã xóa tham chiếu đến hopToLowPlayerServer)
+-- Hàm phát hiện admin
 local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
     for _, player in pairs(Players:GetPlayers()) do
@@ -301,6 +301,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "Tạo Server Mọi Game", "https://raw.githubusercontent.com/JoshzzAlteregooo/FreePrivateServer/refs/heads/main/UniversalFreePrivateServerByJoshzz")
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
+    addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")
 
     -- Tab 99 Đêm
     local tab3 = MakeTab({Name = "99 Đêm"})
@@ -311,7 +312,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tab3, "Skibidi", "https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua")
     addScriptButton(tab3, "Ringta", "https://raw.githubusercontent.com/wefwef127382/99daysloader.github.io/refs/heads/main/ringta.lua")
 
-    -- Tab Hop Server (đã xóa nút Hop Server Ít Người)
+    -- Tab Hop Server
     local tabHop = MakeTab({Name = "Hop Server"})
     addScriptButton(tabHop, "Teddy Hub", "https://raw.githubusercontent.com/Teddyseetink/Haidepzai/refs/heads/main/TEDDYHUB-FREEMIUM")
     addScriptButton(tabHop, "VisionX", "https://raw.githubusercontent.com/xSync-gg/VisionX/refs/heads/main/Server_Finder.lua")
@@ -319,12 +320,6 @@ local function detectGameAndAddTabs()
     -- Tab Hệ Thống Key
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
-
-    -- Tab Mạng Xã Hội
-    local tabSocial = MakeTab({Name = "Mạng Xã Hội"})
-    addButton(tabSocial, "Discord", "https://discord.gg/kJ9ydA2PP4")
-    addButton(tabSocial, "YouTube", "https://www.youtube.com/@kiradavn")
-    addButton(tabSocial, "TikTok", "https://www.tiktok.com/@offbyebyesad")
 
     StarterGui:SetCore("SendNotification", {
         Title = "Thông Báo",
