@@ -1,9 +1,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local ContentProvider = game:GetService("ContentProvider")
 local StarterGui = game:GetService("StarterGui")
 local TeleportService = game:GetService("TeleportService")
-local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local DataStoreService = game:GetService("DataStoreService")
@@ -17,7 +15,7 @@ local KeyDataStore = DataStoreService:GetDataStore("KiradaKeyData")
 -- Đợi game tải
 repeat task.wait() until game:IsLoaded() and LocalPlayer
 
--- Key hợp lệ (không lưu hicak trong danh sách vì sẽ kiểm tra từ DataStore)
+-- Key hợp lệ
 local validKeys = {
     ["noob"] = true,
     ["kiradahub"] = true,
@@ -31,7 +29,7 @@ local validKeys = {
 -- Biến lưu thời gian hết hạn của key hicak
 local hicakExpiration = nil
 
--- Kiểm tra key hicak từ DataStore khi vào game
+-- Kiểm tra key hicak từ DataStore
 local function checkStoredKey()
     local success, storedData = pcall(function()
         return KeyDataStore:GetAsync("Hicak_" .. LocalPlayer.UserId)
@@ -50,7 +48,7 @@ local function saveKeyExpiration(expirationTime)
     end)
 end
 
--- Giao diện nhập key
+-- Giao diện nhập key (đơn giản hóa)
 local function createKeyGui()
     if checkStoredKey() then
         StarterGui:SetCore("SendNotification", {
@@ -65,114 +63,47 @@ local function createKeyGui()
     screenGui.Name = "KeySystemGui"
     screenGui.IgnoreGuiInset = true
 
-    local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
-    blur.Size = 10
-
     local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 350, 0, 250)
-    frame.Position = UDim2.new(0.5, -175, 0.5, -125)
+    frame.Size = UDim2.new(0, 300, 0, 200)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
     frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     frame.BorderSizePixel = 0
-    frame.ClipsDescendants = true
 
     local corner = Instance.new("UICorner", frame)
-    corner.CornerRadius = UDim.new(0, 15)
-
-    local gradient = Instance.new("UIGradient", frame)
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 20))
-    }
-    gradient.Rotation = 45
-
-    local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(0, 120, 255)
-    stroke.Thickness = 2
-    stroke.Transparency = 0.5
-
-    local shadow = Instance.new("Frame")
-    shadow.Size = frame.Size + UDim2.new(0, 10, 0, 10)
-    shadow.Position = frame.Position + UDim2.new(0, -5, 0, -5)
-    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    shadow.BackgroundTransparency = 0.7
-    shadow.ZIndex = frame.ZIndex - 1
-    shadow.Parent = screenGui
-    local shadowCorner = Instance.new("UICorner", shadow)
-    shadowCorner.CornerRadius = UDim.new(0, 15)
+    corner.CornerRadius = UDim.new(0, 10)
 
     local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, 0, 0, 50)
-    title.Position = UDim2.new(0, 0, 0, 15)
+    title.Size = UDim2.new(1, 0, 0, 40)
     title.BackgroundTransparency = 1
     title.Text = "Kirada Premium"
     title.TextColor3 = Color3.fromRGB(0, 170, 255)
     title.TextScaled = true
     title.Font = Enum.Font.GothamBold
-    title.TextStrokeTransparency = 0.8
-    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
-    local subtitle = Instance.new("TextLabel", frame)
-    subtitle.Size = UDim2.new(1, 0, 0, 30)
-    subtitle.Position = UDim2.new(0, 0, 0, 55)
-    subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Nhập Key Để Tiếp Tục"
-    subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-    subtitle.TextScaled = true
-    subtitle.Font = Enum.Font.Gotham
 
     local textBox = Instance.new("TextBox", frame)
-    textBox.Size = UDim2.new(0.8, 0, 0, 45)
-    textBox.Position = UDim2.new(0.1, 0, 0.35, 0)
+    textBox.Size = UDim2.new(0.8, 0, 0, 40)
+    textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
     textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
     textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textBox.PlaceholderText = "Nhập key tại đây..."
-    textBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+    textBox.PlaceholderText = "Nhập key..."
     textBox.Text = ""
     textBox.TextScaled = true
     textBox.Font = Enum.Font.Gotham
-    textBox.ClearTextOnFocus = false
 
     local textBoxCorner = Instance.new("UICorner", textBox)
-    textBoxCorner.CornerRadius = UDim.new(0, 10)
-    local textBoxStroke = Instance.new("UIStroke", textBox)
-    textBoxStroke.Color = Color3.fromRGB(0, 120, 255)
-    textBoxStroke.Thickness = 1.5
+    textBoxCorner.CornerRadius = UDim.new(0, 8)
 
     local submitButton = Instance.new("TextButton", frame)
-    submitButton.Size = UDim2.new(0.8, 0, 0, 45)
+    submitButton.Size = UDim2.new(0.8, 0, 0, 40)
     submitButton.Position = UDim2.new(0.1, 0, 0.65, 0)
     submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
     submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    submitButton.Text = "Xác Nhận Key"
+    submitButton.Text = "Xác Nhận"
     submitButton.TextScaled = true
     submitButton.Font = Enum.Font.GothamBold
 
     local buttonCorner = Instance.new("UICorner", submitButton)
-    buttonCorner.CornerRadius = UDim.new(0, 10)
-    local buttonGradient = Instance.new("UIGradient", submitButton)
-    buttonGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 200))
-    }
-    buttonGradient.Rotation = 90
-
-    submitButton.MouseEnter:Connect(function()
-        TweenService:Create(submitButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
-    end)
-    submitButton.MouseLeave:Connect(function()
-        TweenService:Create(submitButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 120, 255)}):Play()
-    end)
-
-    frame.BackgroundTransparency = 1
-    textBox.BackgroundTransparency = 1
-    submitButton.BackgroundTransparency = 1
-    title.TextTransparency = 1
-    subtitle.TextTransparency = 1
-    TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
-    TweenService:Create(textBox, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0.2), {BackgroundTransparency = 0}):Play()
-    TweenService:Create(submitButton, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0.4), {BackgroundTransparency = 0}):Play()
-    TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
-    TweenService:Create(subtitle, TweenInfo.new(0.5, Enum.EasingStyle.Quint, 0.2), {TextTransparency = 0}):Play()
+    buttonCorner.CornerRadius = UDim.new(0, 8)
 
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
@@ -188,9 +119,6 @@ local function createKeyGui()
                 Text = "Key tạm thời hợp lệ! Chào mừng 😍",
                 Duration = 5
             })
-            TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-            task.wait(0.5)
-            blur:Destroy()
             screenGui:Destroy()
         elseif validity then
             keyEntered = true
@@ -199,9 +127,6 @@ local function createKeyGui()
                 Text = "Cảm ơn bạn đã mua bản Premium 😍",
                 Duration = 5
             })
-            TweenService:Create(frame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-            task.wait(0.5)
-            blur:Destroy()
             screenGui:Destroy()
         else
             StarterGui:SetCore("SendNotification", {
@@ -210,14 +135,6 @@ local function createKeyGui()
                 Duration = 5
             })
             textBox.Text = ""
-            local originalPos = textBox.Position
-            for i = 1, 5 do
-                TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos + UDim2.new(0, 10, 0, 0)}):Play()
-                task.wait(0.05)
-                TweenService:Create(textBox, TweenInfo.new(0.05), {Position = originalPos - UDim2.new(0, 10, 0, 0)}):Play()
-                task.wait(0.05)
-            end
-            textBox.Position = originalPos
         end
     end)
 
@@ -233,7 +150,7 @@ local function createKeyGui()
 end
 pcall(createKeyGui)
 
--- Hàm tạo và cập nhật đồng hồ đếm ngược ở góc phải (chỉ nếu dùng hicak)
+-- Đồng hồ đếm ngược cho key hicak
 local function createCountdownGui()
     if not hicakExpiration then return end
 
@@ -242,8 +159,8 @@ local function createCountdownGui()
     countdownGui.IgnoreGuiInset = true
 
     local textLabel = Instance.new("TextLabel", countdownGui)
-    textLabel.Size = UDim2.new(0, 200, 0, 50)
-    textLabel.Position = UDim2.new(1, -210, 0, 10)
+    textLabel.Size = UDim2.new(0, 150, 0, 40)
+    textLabel.Position = UDim2.new(1, -160, 0, 10)
     textLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     textLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     textLabel.TextScaled = true
@@ -251,9 +168,6 @@ local function createCountdownGui()
     textLabel.BackgroundTransparency = 0.5
     local corner = Instance.new("UICorner", textLabel)
     corner.CornerRadius = UDim.new(0, 8)
-    local stroke = Instance.new("UIStroke", textLabel)
-    stroke.Color = Color3.fromRGB(255, 0, 0)
-    stroke.Thickness = 1
 
     RunService.Heartbeat:Connect(function()
         local remaining = hicakExpiration - os.time()
@@ -275,84 +189,13 @@ spawn(createCountdownGui)
 
 -- Tải UI Redz V2
 pcall(function()
-    local success, result = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua")))
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể tải UI: " .. tostring(result),
-            Duration = 10
-        })
-        return
-    end
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/daucobonhi/Ui-Redz-V2/refs/heads/main/UiREDzV2.lua"))()
 end)
-
--- Preload tài nguyên
-pcall(function()
-    ContentProvider:PreloadAsync({
-        "rbxassetid://75676578090181",
-        "rbxassetid://89326205091486",
-        "rbxassetid://8987546731"
-    })
-end)
-
--- Âm thanh startup
-local function playStartupSound()
-    local sound = Instance.new("Sound", SoundService)
-    sound.SoundId = "rbxassetid://8987546731"
-    sound.Volume = 1
-    sound:Play()
-    sound.Ended:Connect(function()
-        sound:Destroy()
-    end)
-end
-pcall(playStartupSound)
-
--- Intro animation
-local function introAnimation()
-    local screenGui = Instance.new("ScreenGui", PlayerGui)
-    screenGui.IgnoreGuiInset = true
-    local frame = Instance.new("Frame", screenGui)
-    frame.Size = UDim2.new(0, 300, 0, 150)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    frame.BackgroundTransparency = 0.5
-    local textLabel = Instance.new("TextLabel", frame)
-    textLabel.Size = UDim2.new(1, 0, 0.6, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = "Kirada Premium\nTác giả: Kirada VN & Habato\nNgười test: Nấm Gamer"
-    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textLabel.TextScaled = true
-    local imageLabel = Instance.new("ImageLabel", frame)
-    imageLabel.Size = UDim2.new(0, 100, 0, 100)
-    imageLabel.Position = UDim2.new(0.5, -50, 0.6, 0)
-    imageLabel.BackgroundTransparency = 1
-    imageLabel.Image = "rbxassetid://75676578090181"
-    imageLabel.ImageTransparency = 1
-    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine)
-    TweenService:Create(textLabel, tweenInfo, {TextTransparency = 0}):Play()
-    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2}):Play()
-    TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 0}):Play()
-    task.wait(1)
-    TweenService:Create(textLabel, tweenInfo, {TextTransparency = 1}):Play()
-    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
-    TweenService:Create(imageLabel, tweenInfo, {ImageTransparency = 1}):Play()
-    task.wait(1)
-    screenGui:Destroy()
-end
-pcall(introAnimation)
 
 -- Tạo menu chính
 local window = MakeWindow({
     Hub = {Title = "Kirada Premium", Animation = "YouTube: Kirada VN"},
     Key = {KeySystem = false, Title = "Hệ Thống Key", Notifi = {Notifications = true, CorrectKey = "Đang chạy script...", Incorrectkey = "Key không đúng", CopyKeyLink = "Đã sao chép vào clipboard"}}
-})
-MinimizeButton({
-    Image = "rbxassetid://89326205091486",
-    Size = {60, 60},
-    Color = Color3.fromRGB(10, 10, 10),
-    Corner = true,
-    Stroke = false,
-    StrokeColor = Color3.fromRGB(255, 0, 0)
 })
 
 -- Hàm thêm nút sao chép
@@ -408,13 +251,6 @@ local function hopToLowPlayerServer()
                 end
                 cursor = result.nextPageCursor or ""
                 if not cursor then break end
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Không thể lấy danh sách server!",
-                    Duration = 5
-                })
-                break
             end
             attempts = attempts + 1
             task.wait(0.5)
@@ -437,23 +273,10 @@ local function hopToLowPlayerServer()
                     Duration = 5
                 })
                 success = true
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Không tìm thấy server dưới 5 người!",
-                    Duration = 5
-                })
             end
         end)
         teleportAttempts = teleportAttempts + 1
         task.wait(2)
-    end
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "Lỗi",
-            Text = "Không thể hop server sau " .. maxTeleportAttempts .. " lần thử!",
-            Duration = 5
-        })
     end
 end
 
@@ -507,4 +330,13 @@ local function detectGameAndAddTabs()
     local tabKey = MakeTab({Name = "Hệ Thống Key"})
     addButton(tabKey, "Sao Chép Key Speed Hub", "KfHLmNFnuaRmvbkQRwZGXDROXkxhdYAE")
 
-    St
+    StarterGui:SetCore("SendNotification", {
+        Title = "Thông Báo",
+        Text = "Đã load tất cả tab!",
+        Duration = 5
+    })
+end
+
+-- Chạy tab ngay lập tức
+task.wait(0.1)
+detectGameAndAddTabs()
