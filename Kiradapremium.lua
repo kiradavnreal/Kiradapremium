@@ -12,6 +12,11 @@ local gameId = game.PlaceId
 repeat wait() until game:IsLoaded() and game.Players.LocalPlayer
 getgenv().Key = "8a8b1c995ba5555e2becbfcc"
 
+-- Khởi tạo biến lưu trữ
+getgenv().KeyData = getgenv().KeyData or {} -- Lưu trữ dữ liệu key
+getgenv().LastServerId = getgenv().LastServerId or game.JobId -- Lưu server ID hiện tại
+getgenv().ScriptLoaded = getgenv().ScriptLoaded or false -- Trạng thái script đã chạy
+
 -- Key hợp lệ
 local validKeys = {
     ["noob"] = true,
@@ -31,8 +36,46 @@ local specialKeyUserIds = {
     ["kiradagamer"] = 4368306689 -- Key kiradagamer chỉ dành cho User ID 4368306689
 }
 
--- User ID được phép chạy script Banana (noob)
-local bananaScriptUserId = 3949433845
+-- Thời hạn key (10 giờ = 36,000 giây)
+local keyDuration = 36000
+
+-- Hàm kiểm tra và cập nhật thời gian key
+local function checkKeyExpiration(inputKey)
+    local playerUserId = LocalPlayer.UserId
+    local currentTime = os.time()
+
+    -- Kiểm tra nếu key đã được sử dụng trước đó
+    if getgenv().KeyData[inputKey] then
+        local keyInfo = getgenv().KeyData[inputKey]
+        local elapsedTime = currentTime - keyInfo.startTime
+        local remainingTime = keyDuration - elapsedTime
+
+        if remainingTime <= 0 then
+            LocalPlayer:Kick("Key của bạn đã hết hạn! Mua key premium tại fb: Trần Đức Hiếu (Habato)")
+            return false
+        else
+            -- Cập nhật thời gian còn lại
+            StarterGui:SetCore("SendNotification", {
+                Title = "Thông Báo",
+                Text = "Key còn lại: " .. math.floor(remainingTime / 60) .. " phút",
+                Duration = 5
+            })
+            return true
+        end
+    else
+        -- Lưu key mới
+        getgenv().KeyData[inputKey] = {
+            startTime = currentTime,
+            userId = playerUserId
+        }
+        StarterGui:SetCore("SendNotification", {
+            Title = "Thông Báo",
+            Text = "Key hợp lệ! Thời gian sử dụng: 10 giờ",
+            Duration = 5
+        })
+        return true
+    end
+end
 
 -- Giao diện nhập key cải tiến
 local function createKeyGui()
@@ -122,19 +165,7 @@ local function createKeyGui()
 
         -- Kiểm tra key đặc biệt (noob, kiradahub, kiradagamer)
         if specialKeyUserIds[inputKey] and playerUserId ~= specialKeyUserIds[inputKey] then
-            StarterGui:SetCore("SendNotification", {
-                Title = "Lỗi",
-                Text = "Key " .. inputKey .. " chỉ dành cho người dùng đặc biệt!",
-                Duration = 5
-            })
-            textBox.Text = ""
-            -- Hiệu ứng rung khi sai key
-            local originalPos = frame.Position
-            for i = 1, 3 do
-                frame.Position = originalPos + UDim2.new(0, math.random(-5, 5), 0, math.random(-5, 5))
-                task.wait(0.05)
-            end
-            frame.Position = originalPos
+            LocalPlayer:Kick("Mua key premium tại fb: Trần Đức Hiếu (Habato)")
             return
         end
 
@@ -150,36 +181,26 @@ local function createKeyGui()
             return
         end
 
-        -- Kiểm tra key hợp lệ
+        -- Kiểm tra key hợp lệ và thời hạn
         if validKeys[inputKey] then
-            keyEntered = true
-            StarterGui:SetCore("SendNotification", {
-                Title = "Thành Công",
-                Text = "Cảm ơn bạn đã sử dụng premium của mình 😍😘",
-                Duration = 5
-            })
-            -- Hiệu ứng mờ dần khi xác nhận
-            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-            TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
-            TweenService:Create(title, tweenInfo, {TextTransparency = 1}):Play()
-            TweenService:Create(textBox, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
-            TweenService:Create(submitButton, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
-            task.wait(0.5)
-            screenGui:Destroy()
-        else
-            StarterGui:SetCore("SendNotification", {
-                Title = "Lỗi",
-                Text = "Key không hợp lệ! Vui lòng thử lại.",
-                Duration = 5
-            })
-            textBox.Text = ""
-            -- Hiệu ứng rung khi sai key
-            local originalPos = frame.Position
-            for i = 1, 3 do
-                frame.Position = originalPos + UDim2.new(0, math.random(-5, 5), 0, math.random(-5, 5))
-                task.wait(0.05)
+            if checkKeyExpiration(inputKey) then
+                keyEntered = true
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Thành Công",
+                    Text = "Cảm ơn bạn đã sử dụng premium của mình 😍😘",
+                    Duration = 5
+                })
+                -- Hiệu ứng mờ dần khi xác nhận
+                local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+                TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1}):Play()
+                TweenService:Create(title, tweenInfo, {TextTransparency = 1}):Play()
+                TweenService:Create(textBox, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+                TweenService:Create(submitButton, tweenInfo, {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+                task.wait(0.5)
+                screenGui:Destroy()
             end
-            frame.Position = originalPos
+        else
+            LocalPlayer:Kick("Mua key premium tại fb: Trần Đức Hiếu (Habato)")
         end
     end)
 
@@ -194,7 +215,24 @@ local function createKeyGui()
         task.wait(0.1)
     end
 end
-pcall(createKeyGui)
+
+-- Kiểm tra hop server và chạy lại script
+local function checkServerChange()
+    if getgenv().LastServerId ~= game.JobId and getgenv().ScriptLoaded then
+        getgenv().LastServerId = game.JobId
+        getgenv().ScriptLoaded = false
+        pcall(createKeyGui)
+    end
+end
+
+-- Chỉ chạy script nếu chưa chạy trước đó
+if not getgenv().ScriptLoaded then
+    getgenv().ScriptLoaded = true
+    pcall(createKeyGui)
+end
+
+-- Theo dõi hop server
+game:GetService("RunService").Heartbeat:Connect(checkServerChange)
 
 -- Tải UI Redz V2
 pcall(function()
@@ -312,32 +350,6 @@ local function addScriptButton(tab, name, url)
     })
 end
 
--- Hàm thêm nút chạy script Banana (noob) với kiểm tra User ID
-local function addBananaScriptButton(tab, name, url)
-    AddButton(tab, {
-        Name = name,
-        Callback = function()
-            local playerUserId = LocalPlayer.UserId
-            if playerUserId == bananaScriptUserId then
-                pcall(function()
-                    loadstring(game:HttpGet(url))()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Thông Báo",
-                        Text = "Đã chạy script " .. name .. "!",
-                        Duration = 5
-                    })
-                end)
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Lỗi",
-                    Text = "Script " .. name .. " chỉ dành cho người dùng đặc biệt!",
-                    Duration = 5
-                })
-            end
-        end
-    })
-end
-
 -- Hàm phát hiện admin
 local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
@@ -372,7 +384,6 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
     addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")
-    addBananaScriptButton(tab1, "Banana (noob)", "https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/BananaHub.lua")
 
     -- Tab 99 Đêm
     local tab3 = MakeTab({Name = "99 Đêm"})
@@ -400,6 +411,8 @@ local function detectGameAndAddTabs()
     })
 end
 
--- Chạy tab ngay lập tức
-task.wait(0.1)
-detectGameAndAddTabs()
+-- Chạy tab nếu script đã được xác thực
+if getgenv().ScriptLoaded then
+    task.wait(0.1)
+    detectGameAndAddTabs()
+end
