@@ -343,7 +343,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
     addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")
 
-    -- Tab 99 Đêm
+    -- Tab 99 Đêm (đã thêm Thunder Kaitun)
     local tab3 = MakeTab({Name = "99 Đêm"})
     addScriptButton(tab3, "NATHUB", "https://get.nathub.xyz/loader")
     addScriptButton(tab3, "H4X", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
@@ -351,6 +351,7 @@ local function detectGameAndAddTabs()
     addScriptButton(tab3, "Hack Farm Kim Cương", "https://raw.githubusercontent.com/sleepyvill/script/refs/heads/main/99nights.lua")
     addScriptButton(tab3, "Skibidi", "https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua")
     addScriptButton(tab3, "Ringta", "https://raw.githubusercontent.com/wefwef127382/99daysloader.github.io/refs/heads/main/ringta.lua")
+    addScriptButton(tab3, "Thunder Kaitun", "https://raw.githubusercontent.com/NAVAAI098/Thunder-Hub/main/Kaitun.lua")
 
     -- Tab Hop Server
     local tabHop = MakeTab({Name = "Hop Server"})
