@@ -23,8 +23,12 @@ local validKeys = {
     ["kiradagamer"] = true
 }
 
--- User ID được phép sử dụng key đặc biệt kiradahub và kiradagamer
-local specialKeyUserId = 4368306689
+-- User ID được phép sử dụng key đặc biệt
+local specialKeyUserIds = {
+    ["noob"] = 3949433845, -- Key noob chỉ dành cho User ID 3949433845
+    ["kiradahub"] = 4368306689, -- Key kiradahub chỉ dành cho User ID 4368306689
+    ["kiradagamer"] = 4368306689 -- Key kiradagamer chỉ dành cho User ID 4368306689
+}
 
 -- Giao diện nhập key cải tiến
 local function createKeyGui()
@@ -112,8 +116,8 @@ local function createKeyGui()
         local inputKey = textBox.Text:lower()
         local playerUserId = LocalPlayer.UserId
 
-        -- Kiểm tra key đặc biệt chỉ cho User ID 4368306689
-        if (inputKey == "kiradahub" or inputKey == "kiradagamer") and playerUserId ~= specialKeyUserId then
+        -- Kiểm tra key đặc biệt (noob, kiradahub, kiradagamer)
+        if specialKeyUserIds[inputKey] and playerUserId ~= specialKeyUserIds[inputKey] then
             StarterGui:SetCore("SendNotification", {
                 Title = "Lỗi",
                 Text = "Key " .. inputKey .. " chỉ dành cho người dùng đặc biệt!",
@@ -130,9 +134,15 @@ local function createKeyGui()
             return
         end
 
+        -- Cấm User ID 3949433845 sử dụng key khác ngoài noob
+        if playerUserId == specialKeyUserIds["noob"] and inputKey ~= "noob" then
+            LocalPlayer:Kick("Mua key premium tại fb: Trần Đức Hiếu (Habato)")
+            return
+        end
+
         -- Cấm User ID 4368306689 sử dụng key khác ngoài kiradahub và kiradagamer
-        if playerUserId == specialKeyUserId and inputKey ~= "kiradahub" and inputKey ~= "kiradagamer" then
-            LocalPlayer:Kick("Bạn chỉ được phép sử dụng key kiradahub hoặc kiradagamer!")
+        if playerUserId == specialKeyUserIds["kiradahub"] and inputKey ~= "kiradahub" and inputKey ~= "kiradagamer" then
+            LocalPlayer:Kick("Mua key premium tại fb: Trần Đức Hiếu (Habato)")
             return
         end
 
