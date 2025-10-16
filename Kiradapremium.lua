@@ -9,7 +9,7 @@ local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
 -- Đợi game tải
-repeat task.wait() until game:IsLoaded() and LocalPlayer
+repeat wait() until game:IsLoaded() and game.Players.LocalPlayer
 
 -- Key hợp lệ
 local validKeys = {
@@ -22,6 +22,9 @@ local validKeys = {
     ["ezakgaminh"] = true,
     ["kiradagamer"] = true
 }
+
+-- User ID được phép sử dụng key đặc biệt kiradahub và kiradagamer
+local specialKeyUserId = 4368306689
 
 -- Giao diện nhập key cải tiến
 local function createKeyGui()
@@ -107,6 +110,33 @@ local function createKeyGui()
     local keyEntered = false
     submitButton.MouseButton1Click:Connect(function()
         local inputKey = textBox.Text:lower()
+        local playerUserId = LocalPlayer.UserId
+
+        -- Kiểm tra key đặc biệt chỉ cho User ID 4368306689
+        if (inputKey == "kiradahub" or inputKey == "kiradagamer") and playerUserId ~= specialKeyUserId then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Lỗi",
+                Text = "Key " .. inputKey .. " chỉ dành cho người dùng đặc biệt!",
+                Duration = 5
+            })
+            textBox.Text = ""
+            -- Hiệu ứng rung khi sai key
+            local originalPos = frame.Position
+            for i = 1, 3 do
+                frame.Position = originalPos + UDim2.new(0, math.random(-5, 5), 0, math.random(-5, 5))
+                task.wait(0.05)
+            end
+            frame.Position = originalPos
+            return
+        end
+
+        -- Cấm User ID 4368306689 sử dụng key khác ngoài kiradahub và kiradagamer
+        if playerUserId == specialKeyUserId and inputKey ~= "kiradahub" and inputKey ~= "kiradagamer" then
+            LocalPlayer:Kick("Bạn chỉ được phép sử dụng key kiradahub hoặc kiradagamer!")
+            return
+        end
+
+        -- Kiểm tra key hợp lệ
         if validKeys[inputKey] then
             keyEntered = true
             StarterGui:SetCore("SendNotification", {
