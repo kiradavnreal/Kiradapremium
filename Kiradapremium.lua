@@ -8,8 +8,9 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local gameId = game.PlaceId
 
--- Đợi game tải
+-- Đợi game tải và set key
 repeat wait() until game:IsLoaded() and game.Players.LocalPlayer
+getgenv().Key = "8a8b1c995ba5555e2becbfcc"
 
 -- Key hợp lệ
 local validKeys = {
@@ -29,6 +30,9 @@ local specialKeyUserIds = {
     ["kiradahub"] = 4368306689, -- Key kiradahub chỉ dành cho User ID 4368306689
     ["kiradagamer"] = 4368306689 -- Key kiradagamer chỉ dành cho User ID 4368306689
 }
+
+-- User ID được phép chạy script Banana (noob)
+local bananaScriptUserId = 3949433845
 
 -- Giao diện nhập key cải tiến
 local function createKeyGui()
@@ -308,6 +312,32 @@ local function addScriptButton(tab, name, url)
     })
 end
 
+-- Hàm thêm nút chạy script Banana (noob) với kiểm tra User ID
+local function addBananaScriptButton(tab, name, url)
+    AddButton(tab, {
+        Name = name,
+        Callback = function()
+            local playerUserId = LocalPlayer.UserId
+            if playerUserId == bananaScriptUserId then
+                pcall(function()
+                    loadstring(game:HttpGet(url))()
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Thông Báo",
+                        Text = "Đã chạy script " .. name .. "!",
+                        Duration = 5
+                    })
+                end)
+            else
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Lỗi",
+                    Text = "Script " .. name .. " chỉ dành cho người dùng đặc biệt!",
+                    Duration = 5
+                })
+            end
+        end
+    })
+end
+
 -- Hàm phát hiện admin
 local function checkAdmin()
     local adminIds = {[912348] = true, [120173604] = true}
@@ -342,8 +372,9 @@ local function detectGameAndAddTabs()
     addScriptButton(tab1, "Giảm Lag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
     addScriptButton(tab1, "Maru Premium Fake", "https://raw.githubusercontent.com/hnc-roblox/Free/refs/heads/main/MaruHubPremiumFake.HNC%20Roblox.lua")
     addScriptButton(tab1, "Gravity Hub", "https://raw.githubusercontent.com/Dev-GravityHub/BloxFruit/refs/heads/main/Main.lua")
+    addBananaScriptButton(tab1, "Banana (noob)", "https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/BananaHub.lua")
 
-    -- Tab 99 Đêm (đã thêm Thunder Kaitun)
+    -- Tab 99 Đêm
     local tab3 = MakeTab({Name = "99 Đêm"})
     addScriptButton(tab3, "NATHUB", "https://get.nathub.xyz/loader")
     addScriptButton(tab3, "H4X", "https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua")
